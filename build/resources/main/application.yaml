@@ -1,0 +1,15 @@
+ktor:
+  deployment:
+    port: 8080
+  application:
+    modules:
+      - com.flashcard.SerializationKt.configureSerialization
+      - com.flashcard.StatusPagesKt.configureStatusPages
+      - com.flashcard.RoutingKt.configureRouting
+      - com.flashcard.DatabaseKt.configureDatabase
+database:
+  host: localhost
+  port: 5432
+  name: flashcard_db
+  user: postgres
+  password: "bistro"
