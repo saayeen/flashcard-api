@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.flashcard.ServerTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-05-31T06:25:15.099Z" hostname="SYLUSI" time="0.005">
-  <properties/>
-  <testcase name="testRoot" classname="com.flashcard.ServerTest" time="0.005"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
