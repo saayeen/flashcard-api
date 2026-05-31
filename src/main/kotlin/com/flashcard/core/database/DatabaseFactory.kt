@@ -29,6 +29,9 @@ object DatabaseFactory {
         transaction {
             SchemaUtils.create(PackagesTable)
             logger.info("Tablas creadas/verificadas correctamente")
+
+            SchemaUtils.create(PackagesTable, UsersTable)
+            logger.info("Tablas creadas/verificadas correctamente")
         }
     }
 }

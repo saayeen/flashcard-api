@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.flashcard.ServerTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-05-31T05:25:41.574Z" hostname="SYLUSI" time="0.004">
+<testsuite name="com.flashcard.ServerTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-05-31T06:00:52.602Z" hostname="SYLUSI" time="0.004">
   <properties/>
   <testcase name="testRoot" classname="com.flashcard.ServerTest" time="0.004"/>
   <system-out><![CDATA[]]></system-out>

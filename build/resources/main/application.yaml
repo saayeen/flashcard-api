@@ -3,10 +3,10 @@ ktor:
     port: 8080
   application:
     modules:
-      - com.flashcard.SerializationKt.configureSerialization
-      - com.flashcard.StatusPagesKt.configureStatusPages
-      - com.flashcard.RoutingKt.configureRouting
-      - com.flashcard.DatabaseKt.configureDatabase
+      - com.flashcard.plugins.SerializationKt.configureSerialization
+      - com.flashcard.plugins.StatusPagesKt.configureStatusPages
+      - com.flashcard.plugins.RoutingKt.configureRouting
+      - com.flashcard.plugins.DatabaseKt.configureDatabase
 database:
   host: localhost
   port: 5432
