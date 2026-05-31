@@ -30,6 +30,8 @@ dependencies {
     implementation(libs.exposed.core)
     implementation(libs.exposed.jdbc)
     implementation(libs.exposed.dao)
+    implementation(libs.exposed.java.time)
+
     implementation(libs.postgresql)
 
     implementation(libs.firebase.admin)
