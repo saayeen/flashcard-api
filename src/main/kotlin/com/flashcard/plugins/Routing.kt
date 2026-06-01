@@ -3,6 +3,7 @@ package com.flashcard.plugins
 import com.flashcard.modules.cards.cardRoutes
 import com.flashcard.modules.folders.folderRoutes
 import com.flashcard.modules.packages.packageRoutes
+import com.flashcard.modules.search.searchRoutes
 import com.flashcard.modules.study.studyRoutes
 import com.flashcard.modules.users.userRoutes
 import io.ktor.server.application.*
@@ -15,5 +16,6 @@ fun Application.configureRouting() {
         cardRoutes()
         studyRoutes()
         folderRoutes()
+        searchRoutes()
     }
 }
