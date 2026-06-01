@@ -18,7 +18,7 @@ suspend fun ApplicationCall.requireAuth(
 ) {
     val userId = getUserId()
     if (userId == null) {
-        respond(HttpStatusCode.Unauthorized, mapOf("message" to "Token inválido o ausente"))
+        respond(HttpStatusCode.Unauthorized, mapOf("message" to "Token invalido o ausente"))
         return
     }
     block(userId)
