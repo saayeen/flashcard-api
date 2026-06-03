@@ -5,6 +5,7 @@ import com.flashcard.modules.collaboration.collaborationRoutes
 import com.flashcard.modules.folders.folderRoutes
 import com.flashcard.modules.packages.packageRoutes
 import com.flashcard.modules.search.searchRoutes
+import com.flashcard.modules.stats.statsRoutes
 import com.flashcard.modules.study.studyRoutes
 import com.flashcard.modules.users.userRoutes
 import io.ktor.server.application.*
@@ -19,5 +20,6 @@ fun Application.configureRouting() {
         folderRoutes()
         searchRoutes()
         collaborationRoutes()
+        statsRoutes()
     }
 }
