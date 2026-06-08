@@ -9,8 +9,10 @@ data class User(
     val name: String,
     val photoUrl: String? = null,
     val description: String = "",
-    val isPublic: Boolean = true
+    val isPublic: Boolean = true,
+    val isAdmin: Boolean = false
 )
+
 
 @Serializable
 data class UpdateUserRequest(

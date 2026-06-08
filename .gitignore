@@ -1,2 +1,9 @@
-.gradle/
+# Archivos que debes ignorar en tu proyecto Ktor
 build/
+.gradle/
+.idea/
+*.class
+*.jar
+local.properties
+.env
+src/main/resources/firebase-service-account.json

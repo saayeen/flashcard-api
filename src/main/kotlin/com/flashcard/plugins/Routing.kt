@@ -1,5 +1,6 @@
 package com.flashcard.plugins
 
+import com.flashcard.modules.admin.adminRoutes
 import com.flashcard.modules.cards.cardRoutes
 import com.flashcard.modules.collaboration.collaborationRoutes
 import com.flashcard.modules.folders.folderRoutes
@@ -13,6 +14,7 @@ import io.ktor.server.routing.*
 
 fun Application.configureRouting() {
     routing {
+
         userRoutes()
         packageRoutes()
         cardRoutes()
@@ -21,5 +23,7 @@ fun Application.configureRouting() {
         searchRoutes()
         collaborationRoutes()
         statsRoutes()
+        adminRoutes()
+
     }
 }

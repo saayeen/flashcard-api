@@ -1,14 +1,15 @@
 // Usa los datos que ya existen en "card_reviews" y "study_sessions".
 
-import com.flashcard.modules.study.SessionSummary
+package com.flashcard.modules.stats
+
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class GlobalStats(
     val totalCardsReviewed: Int,
-    val totalSession: Int,
+    val totalSessions: Int,
     val currentStreak: Int,
-    val distribucion: ReviewDistribution
+    val distribution: ReviewDistribution
 )
 
 @Serializable
@@ -23,10 +24,9 @@ data class ReviewDistribution(
 data class PackageStats(
     val packageId: Int,
     val totalCards: Int,
-    val reviewed: ReviewDistribution,
-    val distribucion: ReviewDistribution,
+    val reviewedCards: Int,
+    val distribution: ReviewDistribution,
     val nextReviewDate: String?
-
 )
 
 @Serializable
