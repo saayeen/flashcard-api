@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ktor)
     application
 }
 
@@ -9,6 +10,12 @@ version = "1.0.0-SNAPSHOT"
 
 application {
     mainClass = "io.ktor.server.netty.EngineMain"
+}
+
+ktor {
+    fatJar {
+        archiveFileName = "app.jar"
+    }
 }
 
 kotlin {

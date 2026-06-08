@@ -8,8 +8,8 @@ ktor:
       - com.flashcard.plugins.RoutingKt.configureRouting
       - com.flashcard.plugins.DatabaseKt.configureDatabase
 database:
-  host: localhost
+  host: db
   port: 5432
-  name: flashcard_db
+  name: flashcard
   user: postgres
-  password: "bistro"
+  password: "postgres"
