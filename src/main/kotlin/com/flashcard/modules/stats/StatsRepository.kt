@@ -1,5 +1,8 @@
 package com.flashcard.modules.stats
 
+import com.flashcard.core.database.CardReviewsTable
+import com.flashcard.core.database.CardsTable
+import com.flashcard.core.database.StudySessionsTable
 import com.flashcard.modules.stats.GlobalStats
 import com.flashcard.modules.stats.ReviewDistribution
 import com.flashcard.modules.stats.PackageStats
