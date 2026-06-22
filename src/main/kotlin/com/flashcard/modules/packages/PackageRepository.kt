@@ -27,8 +27,9 @@ object PackageRepository {
             .singleOrNull()
     }
 
-    fun create(name: String, description: String, category: String, isPublic: Boolean): FlashcardPackage = transaction {
+    fun create(userId: String, name: String, description: String, category: String, isPublic: Boolean): FlashcardPackage = transaction {
         val newId = PackagesTable.insert {
+            it[PackagesTable.userId]      = userId
             it[PackagesTable.name]        = name
             it[PackagesTable.description] = description
             it[PackagesTable.category]    = category

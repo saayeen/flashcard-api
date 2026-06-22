@@ -1,15 +1,17 @@
 ktor:
   deployment:
-    port: 8080
+    port: ${PORT:8080}
   application:
     modules:
+      - com.flashcard.plugins.CorsKt.configureCORS
       - com.flashcard.plugins.SerializationKt.configureSerialization
       - com.flashcard.plugins.StatusPagesKt.configureStatusPages
       - com.flashcard.plugins.RoutingKt.configureRouting
       - com.flashcard.plugins.DatabaseKt.configureDatabase
+
 database:
-  host: db
-  port: 5432
-  name: flashcard
-  user: postgres
-  password: "postgres"
+  host: ${DB_HOST:localhost}
+  port: ${DB_PORT:5433}
+  name: ${DB_NAME:flashcard}
+  user: ${DB_USER:postgres}
+  password: ${DB_PASSWORD:postgres}

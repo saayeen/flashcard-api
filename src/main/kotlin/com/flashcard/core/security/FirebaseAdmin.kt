@@ -9,13 +9,10 @@ import com.google.firebase.auth.FirebaseToken
 object FirebaseAdmin {
 
     fun init() {
-        val serviceAccount = FirebaseAdmin::class.java
-            .classLoader
-            .getResourceAsStream("firebase-service-account.json")
-            ?: throw IllegalStateException("No se encontró firebase-service-account.json")
+        val credentials = buildCredentials()
 
         val options = FirebaseOptions.builder()
-            .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+            .setCredentials(credentials)
             .build()
 
         if (FirebaseApp.getApps().isEmpty()) {
@@ -23,8 +20,22 @@ object FirebaseAdmin {
         }
     }
 
-    // Verifica el token JWT que viene del frontend
-    // Devuelve el token decodificado si es válido, null si no
+    private fun buildCredentials(): GoogleCredentials {
+        // En producción (Railway): viene como variable de entorno con el JSON completo
+        val json = System.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
+        if (json != null) {
+            return GoogleCredentials.fromStream(json.byteInputStream())
+        }
+
+        // En local: lee el archivo como antes
+        val stream = FirebaseAdmin::class.java
+            .classLoader
+            .getResourceAsStream("firebase-service-account.json")
+            ?: throw IllegalStateException("No se encontró firebase-service-account.json")
+
+        return GoogleCredentials.fromStream(stream)
+    }
+
     fun verifyToken(idToken: String): FirebaseToken? {
         return try {
             FirebaseAuth.getInstance().verifyIdToken(idToken)

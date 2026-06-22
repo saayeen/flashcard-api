@@ -12,6 +12,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 fun Route.adminRoutes() {
 
+    //consulta como
     // middleware — verifica que el usuario es admin
     suspend fun isAdmin(userId: String): Boolean = transaction {
         UsersTable

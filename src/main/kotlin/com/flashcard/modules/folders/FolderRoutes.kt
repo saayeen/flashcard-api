@@ -18,6 +18,8 @@ fun Route.folderRoutes() {
         call.respond(HttpStatusCode.OK, FolderService.getAll(userId))
     }
 
+    //Crear carpetas (tambien pueden estar vacias)
+
     post("/folders") {
         val userId = call.getUserId()
         if (userId == null) {
@@ -28,6 +30,7 @@ fun Route.folderRoutes() {
         val folder = FolderService.create(userId, body)
         call.respond(HttpStatusCode.Created, folder)
     }
+
 
     patch("/folders/{id}") {
         val userId = call.getUserId()
@@ -68,6 +71,8 @@ fun Route.folderRoutes() {
         call.respond(HttpStatusCode.OK, MessageResponse("Carpeta eliminada"))
     }
 
+    // Se agrega un paquete a una carpeta
+
     post("/folders/{id}/packages/{packageId}") {
         val userId = call.getUserId()
         if (userId == null) {
@@ -83,6 +88,27 @@ fun Route.folderRoutes() {
         FolderService.addPackage(folderId, packageId)
         call.respond(HttpStatusCode.OK, MessageResponse("Paquete agregado a la carpeta"))
     }
+
+
+    // Esta solo es para comprobar que este bien
+    get("/folders/{id}/packages") {
+        val id = call.parameters["id"]?.toIntOrNull()
+        if (id == null) {
+            call.respond(HttpStatusCode.BadRequest, MessageResponse("id invalido"))
+            return@get
+        }
+        val packages = FolderService.getPackagesInFolder(id)
+        call.respond(HttpStatusCode.OK, packages)
+    }
+
+
+    // Se borra el paquete de dicha carpeta ?
+    //pero el paquete se borra en si o solo se borra el hecho de que este dentro de la carpeta ?
+    //despues por default queda como paquete simplemente?
+
+    //Respuestas: no, nose borra el paquete solo se borra la fila de la tabla intermedia
+    //folder_packages (la realcion folder - package)
+    //El paquete sigue existiendo en packages, solod eja de estar asociado a la carpeta
 
     delete("/folders/{id}/packages/{packageId}") {
         val userId = call.getUserId()

@@ -41,6 +41,8 @@ fun Route.collaborationRoutes() {
         call.respond(HttpStatusCode.OK, result)
     }
 
+    //Uno si se equivoca al poner el review tendra la opcion de equivocarse
+
     // GET /packages/{id}/reviews — ver reseñas
     get("/packages/{id}/reviews") {
         val packageId = call.parameters["id"]?.toIntOrNull()

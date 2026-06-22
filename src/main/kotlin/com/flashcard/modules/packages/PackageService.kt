@@ -12,6 +12,7 @@ object PackageService {
 
     fun create(body: CreatePackageRequest, userId: String): FlashcardPackage {
         return PackageRepository.create(
+            userId = userId,
             name = body.name.trim(),
             description = body.description.trim(),
             category = body.category.trim(),

@@ -1,5 +1,6 @@
 package com.flashcard.modules.folders
-
+import com.flashcard.modules.packages.FlashcardPackage
+import com.flashcard.modules.packages.PackageRepository
 object FolderService {
 
     fun getAll(userId: String): List<Folder> {
@@ -29,6 +30,11 @@ object FolderService {
 
     fun removePackage(folderId: Int, packageId: Int): Boolean {
         return FolderRepository.removePackage(folderId, packageId)
+    }
+
+    fun getPackagesInFolder(folderId: Int): List<FlashcardPackage> {
+        val ids = FolderRepository.getPackageIds(folderId)
+        return ids.mapNotNull { PackageRepository.findById(it) }
     }
 
     fun getPackageIds(folderId: Int): List<Int> {

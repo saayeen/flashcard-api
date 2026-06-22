@@ -35,6 +35,7 @@ object StudyRepository {
         val newId = StudySessionsTable.insert {
             it[StudySessionsTable.userId]    = userId
             it[StudySessionsTable.packageId] = packageId
+            it[StudySessionsTable.startedAt] = LocalDateTime.now()
         } get StudySessionsTable.id
         StudySessionsTable.selectAll()
             .where { StudySessionsTable.id eq newId }
@@ -78,6 +79,7 @@ object StudyRepository {
             it[CardReviewsTable.easeFactor]   = easeFactor
             it[CardReviewsTable.intervalDays] = intervalDays
             it[CardReviewsTable.nextReview]   = nextReview
+            it[CardReviewsTable.reviewedAt]   = LocalDateTime.now()
         } get CardReviewsTable.id
         CardReviewsTable.selectAll()
             .where { CardReviewsTable.id eq newId }

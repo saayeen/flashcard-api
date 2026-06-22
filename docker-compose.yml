@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 
@@ -20,6 +20,10 @@ services:
       - db
     environment:
       - DB_HOST=db
+      - DB_PORT=5432        # dentro de Docker la red interna usa 5432, no 5433
+      - DB_NAME=flashcard
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
 
 volumes:
   pgdata:
