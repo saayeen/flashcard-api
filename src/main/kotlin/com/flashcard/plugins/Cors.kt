@@ -1,3 +1,9 @@
+package com.flashcard.plugins
+
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.plugins.cors.routing.*
+
 fun Application.configureCORS() {
     val frontendUrl = System.getenv("FRONTEND_URL") ?: "localhost:5173"
     val isLocal = frontendUrl.contains("localhost")
@@ -11,10 +17,8 @@ fun Application.configureCORS() {
         allowHeader(HttpHeaders.Authorization)
         allowHeader(HttpHeaders.ContentType)
 
-        // Siempre permite local para desarrolloo
         allowHost("localhost:5173")
 
-        //Cuando este en producción permite el dominio de Vercel
         if (!isLocal) {
             allowHost(frontendUrl, schemes = listOf("https"))
         }
