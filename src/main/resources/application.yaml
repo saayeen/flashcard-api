@@ -14,4 +14,4 @@ database:
   port: 5433
   name: flashcard
   user: postgres
-  password: postgresugins.DatabaseKt.configureDatabase
+  password: postgres
