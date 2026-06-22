@@ -10,8 +10,8 @@ ktor:
       - com.flashcard.plugins.DatabaseKt.configureDatabase
 
 database:
-  host: ${DB_HOST:localhost}
-  port: ${DB_PORT:5433}
-  name: ${DB_NAME:flashcard}
-  user: ${DB_USER:postgres}
-  password: ${DB_PASSWORD:postgres}
+  host: localhost
+  port: 5433
+  name: flashcard
+  user: postgres
+  password: postgresugins.DatabaseKt.configureDatabase
