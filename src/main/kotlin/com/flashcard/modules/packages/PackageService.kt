@@ -16,7 +16,8 @@ object PackageService {
             name = body.name.trim(),
             description = body.description.trim(),
             category = body.category.trim(),
-            isPublic = body.isPublic
+            isPublic = body.isPublic,
+            theme = body.theme
         )
     }
 
@@ -24,4 +25,6 @@ object PackageService {
         PackageRepository.findById(id) ?: return false
         return PackageRepository.delete(id)
     }
+
+
 }

@@ -9,7 +9,8 @@ data class FlashcardPackage(
     val description: String,
     val category: String,
     val cardCount: Int = 0,
-    val isPublic: Boolean = true
+    val isPublic: Boolean = true,
+    val theme: String = "blue"
 )
 
 @Serializable
@@ -17,7 +18,8 @@ data class CreatePackageRequest(
     val name: String,
     val description: String,
     val category: String,
-    val isPublic: Boolean = true
+    val isPublic: Boolean = true,
+    val theme: String = "blue"
 )
 
 @Serializable

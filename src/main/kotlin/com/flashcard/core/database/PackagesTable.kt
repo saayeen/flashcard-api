@@ -10,6 +10,7 @@ object PackagesTable : Table("packages") {
     val userId           = varchar("user_id", 128)
     val name             = varchar("name", 255)
     val description      = text("description")
+    val theme = varchar("theme", 50).default("blue")
     val category         = varchar("category", 100)
     val cardCount        = integer("card_count").default(0)
     val isPublic         = bool("is_public").default(true)

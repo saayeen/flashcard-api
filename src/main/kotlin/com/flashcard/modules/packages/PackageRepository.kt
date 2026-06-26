@@ -13,7 +13,8 @@ object PackageRepository {
         description = row[PackagesTable.description],
         category    = row[PackagesTable.category],
         cardCount   = row[PackagesTable.cardCount],
-        isPublic    = row[PackagesTable.isPublic]
+        isPublic    = row[PackagesTable.isPublic],
+        theme       = row[PackagesTable.theme]
     )
 
     fun findAll(): List<FlashcardPackage> = transaction {
@@ -27,13 +28,14 @@ object PackageRepository {
             .singleOrNull()
     }
 
-    fun create(userId: String, name: String, description: String, category: String, isPublic: Boolean): FlashcardPackage = transaction {
+    fun create(userId: String, name: String, description: String, category: String, isPublic: Boolean, theme: String): FlashcardPackage = transaction {
         val newId = PackagesTable.insert {
             it[PackagesTable.userId]      = userId
             it[PackagesTable.name]        = name
             it[PackagesTable.description] = description
             it[PackagesTable.category]    = category
             it[PackagesTable.isPublic]    = isPublic
+            it[PackagesTable.theme]       = theme
         } get PackagesTable.id
         findById(newId)!!
     }
