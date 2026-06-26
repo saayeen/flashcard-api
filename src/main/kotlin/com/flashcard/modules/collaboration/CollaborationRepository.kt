@@ -112,4 +112,16 @@ object CollaborationRepository {
             }
     }
 
+    fun getFollowersCount(userId: String): Int = transaction {
+        FollowersTable.selectAll()
+            .where { FollowersTable.followingId eq userId }
+            .count().toInt()
+    }
+
+    fun getFollowingCount(userId: String): Int = transaction {
+        FollowersTable.selectAll()
+            .where { FollowersTable.followerId eq userId }
+            .count().toInt()
+    }
+
 }

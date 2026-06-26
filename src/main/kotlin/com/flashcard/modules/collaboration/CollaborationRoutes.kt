@@ -69,4 +69,26 @@ fun Route.collaborationRoutes() {
         val review = CollaborationService.createReview(userId, packageId, body)
         call.respond(HttpStatusCode.Created, review)
     }
+
+    // GET /users/{id}/followers/count
+    get("/users/{id}/followers/count") {
+        val userId = call.parameters["id"]
+        if (userId == null) {
+            call.respond(HttpStatusCode.BadRequest, MessageResponse("id invalido"))
+            return@get
+        }
+        val count = CollaborationRepository.getFollowersCount(userId)
+        call.respond(HttpStatusCode.OK, mapOf("count" to count))
+    }
+
+// GET /users/{id}/following/count
+    get("/users/{id}/following/count") {
+        val userId = call.getUserId()
+        if (userId == null) {
+            call.respond(HttpStatusCode.Unauthorized, mapOf("message" to "Token invalido o ausente"))
+            return@get
+        }
+        val count = CollaborationRepository.getFollowingCount(userId)
+        call.respond(HttpStatusCode.OK, mapOf("count" to count))
+    }
 }

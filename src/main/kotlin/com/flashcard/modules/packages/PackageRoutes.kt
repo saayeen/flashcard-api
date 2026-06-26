@@ -50,4 +50,12 @@ fun Route.packageRoutes() {
             call.respond(HttpStatusCode.OK, MessageResponse("Paquete eliminado"))
         }
     }
+
+    get("/users/me/packages") {
+        call.requireAuth { userId ->
+            val packages = PackageRepository.findAll()
+                .filter { it.userId == userId }
+            call.respond(HttpStatusCode.OK, packages)
+        }
+    }
 }
