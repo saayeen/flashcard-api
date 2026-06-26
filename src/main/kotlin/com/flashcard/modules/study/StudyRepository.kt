@@ -102,4 +102,13 @@ object StudyRepository {
             }
             .map { it[CardReviewsTable.cardId] }
     }
+
+    fun getLastSession(userId: String): StudySession? = transaction {
+        StudySessionsTable.selectAll()
+            .where { StudySessionsTable.userId eq userId }
+            .orderBy(StudySessionsTable.startedAt, SortOrder.DESC)
+            .limit(1)
+            .map { rowToSession(it) }
+            .singleOrNull()
+    }
 }

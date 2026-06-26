@@ -61,4 +61,18 @@ fun Route.studyRoutes() {
         val summary = StudyService.finishSession(sessionId)
         call.respond(HttpStatusCode.OK, summary)
     }
+
+    get("/study/last-session") {
+        val userId = call.getUserId()
+        if (userId == null) {
+            call.respond(HttpStatusCode.Unauthorized, mapOf("message" to "Token invalido o ausente"))
+            return@get
+        }
+        val session = StudyRepository.getLastSession(userId)
+        if (session == null) {
+            call.respond(HttpStatusCode.NotFound, mapOf("message" to "Sin sesiones"))
+            return@get
+        }
+        call.respond(HttpStatusCode.OK, session)
+    }
 }
