@@ -52,9 +52,8 @@ fun Route.packageRoutes() {
     }
 
     get("/users/me/packages") {
-        call.requireAuth { userId ->
-            val packages = PackageRepository.findAll()
-                .filter { it.userId == userId }
+        call.requireAuth { _ ->
+            val packages = PackageService.getAll()
             call.respond(HttpStatusCode.OK, packages)
         }
     }
