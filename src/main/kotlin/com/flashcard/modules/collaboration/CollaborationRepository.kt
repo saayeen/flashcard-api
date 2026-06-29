@@ -40,12 +40,14 @@ object CollaborationRepository {
             .where { PackagesTable.id eq newId }
             .map { row ->
                 FlashcardPackage(
-                    id = row[PackagesTable.id],
-                    name = row[PackagesTable.name],
+                    id          = row[PackagesTable.id],
+                    userId      = row[PackagesTable.userId],  // ← agregar esto
+                    name        = row[PackagesTable.name],
                     description = row[PackagesTable.description],
-                    category = row[PackagesTable.category],
-                    cardCount = row[PackagesTable.cardCount],
-                    isPublic = row[PackagesTable.isPublic]
+                    category    = row[PackagesTable.category],
+                    cardCount   = row[PackagesTable.cardCount],
+                    isPublic    = row[PackagesTable.isPublic],
+                    theme       = row[PackagesTable.theme] ?: "default"  // ← y esto
                 )
             }.first()
     }

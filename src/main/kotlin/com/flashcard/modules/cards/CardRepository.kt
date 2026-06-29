@@ -6,14 +6,6 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDateTime
 
-package com.flashcard.modules.cards
-
-import com.flashcard.core.database.CardsTable
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.transactions.transaction
-import java.time.LocalDateTime
-
 object CardRepository {
 
     private fun rowToCard(row: ResultRow) = Card(
