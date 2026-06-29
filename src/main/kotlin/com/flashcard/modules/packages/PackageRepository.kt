@@ -9,16 +9,19 @@ object PackageRepository {
 
     private fun rowToPackage(row: ResultRow) = FlashcardPackage(
         id          = row[PackagesTable.id],
+        userId      = row[PackagesTable.userId],
         name        = row[PackagesTable.name],
         description = row[PackagesTable.description],
         category    = row[PackagesTable.category],
         cardCount   = row[PackagesTable.cardCount],
         isPublic    = row[PackagesTable.isPublic],
-        theme       = row[PackagesTable.theme]
+        theme       = row[PackagesTable.theme] ?: "default"
     )
 
     fun findAll(): List<FlashcardPackage> = transaction {
-        PackagesTable.selectAll().map { rowToPackage(it) }
+        PackagesTable.selectAll()
+            .where { PackagesTable.deletedAt.isNull() }
+            .map { rowToPackage(it) }
     }
 
     fun findById(id: Int): FlashcardPackage? = transaction {
@@ -40,8 +43,32 @@ object PackageRepository {
         findById(newId)!!
     }
 
+    // ← NUEVO: actualizar nombre, descripción, categoría, visibilidad
+    fun update(
+        id: Int,
+        name: String?,
+        description: String?,
+        category: String?,
+        isPublic: Boolean?
+    ): FlashcardPackage? = transaction {
+        PackagesTable.update({ PackagesTable.id eq id }) {
+            if (name        != null) it[PackagesTable.name]        = name
+            if (description != null) it[PackagesTable.description] = description
+            if (category    != null) it[PackagesTable.category]    = category
+            if (isPublic    != null) it[PackagesTable.isPublic]    = isPublic
+        }
+        findById(id)
+    }
+
     fun delete(id: Int): Boolean = transaction {
         val deletedRows = PackagesTable.deleteWhere { PackagesTable.id eq id }
         deletedRows > 0
+    }
+
+    fun getOwnerId(packageId: Int): String? = transaction {
+        PackagesTable.selectAll()
+            .where { PackagesTable.id eq packageId }
+            .map { it[PackagesTable.userId] }
+            .firstOrNull()
     }
 }

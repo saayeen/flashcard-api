@@ -35,6 +35,28 @@ fun Route.packageRoutes() {
         }
     }
 
+    //  editar paquete
+    patch("/packages/{id}") {
+        call.requireAuth { userId ->
+            val id = call.parameters["id"]?.toIntOrNull()
+            if (id == null) {
+                call.respond(HttpStatusCode.BadRequest, MessageResponse("El id debe ser un número"))
+                return@requireAuth
+            }
+            val body = call.receive<UpdatePackageRequest>()
+            try {
+                val updated = PackageService.update(id, userId, body)
+                if (updated == null) {
+                    call.respond(HttpStatusCode.NotFound, MessageResponse("Paquete no encontrado"))
+                    return@requireAuth
+                }
+                call.respond(HttpStatusCode.OK, updated)
+            } catch (e: IllegalArgumentException) {
+                call.respond(HttpStatusCode.Forbidden, MessageResponse(e.message ?: "Sin permiso"))
+            }
+        }
+    }
+
     delete("/packages/{id}") {
         call.requireAuth { userId ->
             val id = call.parameters["id"]?.toIntOrNull()
@@ -42,19 +64,23 @@ fun Route.packageRoutes() {
                 call.respond(HttpStatusCode.BadRequest, MessageResponse("El id debe ser un numero"))
                 return@requireAuth
             }
-            val eliminado = PackageService.delete(id, userId)
-            if (!eliminado) {
-                call.respond(HttpStatusCode.NotFound, MessageResponse("Paquete no encontrado"))
-                return@requireAuth
+            try {
+                val eliminado = PackageService.delete(id, userId)
+                if (!eliminado) {
+                    call.respond(HttpStatusCode.NotFound, MessageResponse("Paquete no encontrado"))
+                    return@requireAuth
+                }
+                call.respond(HttpStatusCode.OK, MessageResponse("Paquete eliminado"))
+            } catch (e: IllegalArgumentException) {
+                call.respond(HttpStatusCode.Forbidden, MessageResponse(e.message ?: "Sin permiso"))
             }
-            call.respond(HttpStatusCode.OK, MessageResponse("Paquete eliminado"))
         }
     }
 
     get("/users/me/packages") {
-        call.requireAuth { _ ->
-            val packages = PackageService.getAll()
-            call.respond(HttpStatusCode.OK, packages)
+        call.requireAuth { userId ->
+            val all = PackageService.getAll().filter { it.userId == userId }
+            call.respond(HttpStatusCode.OK, all)
         }
     }
 }

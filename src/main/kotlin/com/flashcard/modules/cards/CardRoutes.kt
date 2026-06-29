@@ -29,12 +29,15 @@ fun Route.cardRoutes() {
                 return@requireAuth
             }
             val body = call.receive<CreateCardRequest>()
-            val card = CardService.create(packageId, body)
-            call.respond(HttpStatusCode.Created, card)
+            try {
+                val card = CardService.create(packageId, userId, body)
+                call.respond(HttpStatusCode.Created, card)
+            } catch (e: IllegalArgumentException) {
+                call.respond(HttpStatusCode.Forbidden, MessageResponse(e.message ?: "Sin permiso"))
+            }
         }
     }
 
-    // PATCH /cards/{id} — editar tarjeta
     patch("/cards/{id}") {
         call.requireAuth { userId ->
             val id = call.parameters["id"]?.toIntOrNull()
@@ -43,16 +46,19 @@ fun Route.cardRoutes() {
                 return@requireAuth
             }
             val body = call.receive<UpdateCardRequest>()
-            val updated = CardService.update(id, body)
-            if (updated == null) {
-                call.respond(HttpStatusCode.NotFound, MessageResponse("Tarjeta no encontrada"))
-                return@requireAuth
+            try {
+                val updated = CardService.update(id, userId, body)
+                if (updated == null) {
+                    call.respond(HttpStatusCode.NotFound, MessageResponse("Tarjeta no encontrada"))
+                    return@requireAuth
+                }
+                call.respond(HttpStatusCode.OK, updated)
+            } catch (e: IllegalArgumentException) {
+                call.respond(HttpStatusCode.Forbidden, MessageResponse(e.message ?: "Sin permiso"))
             }
-            call.respond(HttpStatusCode.OK, updated)
         }
     }
 
-    // DELETE /cards/{id} — soft delete
     delete("/cards/{id}") {
         call.requireAuth { userId ->
             val id = call.parameters["id"]?.toIntOrNull()
@@ -60,12 +66,16 @@ fun Route.cardRoutes() {
                 call.respond(HttpStatusCode.BadRequest, MessageResponse("id invalido"))
                 return@requireAuth
             }
-            val eliminado = CardService.delete(id)
-            if (!eliminado) {
-                call.respond(HttpStatusCode.NotFound, MessageResponse("Tarjeta no encontrada"))
-                return@requireAuth
+            try {
+                val eliminado = CardService.delete(id, userId)
+                if (!eliminado) {
+                    call.respond(HttpStatusCode.NotFound, MessageResponse("Tarjeta no encontrada"))
+                    return@requireAuth
+                }
+                call.respond(HttpStatusCode.OK, MessageResponse("Tarjeta eliminada"))
+            } catch (e: IllegalArgumentException) {
+                call.respond(HttpStatusCode.Forbidden, MessageResponse(e.message ?: "Sin permiso"))
             }
-            call.respond(HttpStatusCode.OK, MessageResponse("Tarjeta eliminada"))
         }
     }
 }
