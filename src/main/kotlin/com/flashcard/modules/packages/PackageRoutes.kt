@@ -1,6 +1,7 @@
 package com.flashcard.modules.packages
 
 import com.flashcard.core.security.requireAuth
+import com.flashcard.core.security.getUserId
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -8,22 +9,16 @@ import io.ktor.server.routing.*
 
 fun Route.packageRoutes() {
 
+    // todos los públicos — para Home/Trending
     get("/packages") {
-        val packages = PackageService.getAll()
-        call.respond(HttpStatusCode.OK, packages)
+        call.respond(HttpStatusCode.OK, PackageRepository.findAllPublic())
     }
 
     get("/packages/{id}") {
         val id = call.parameters["id"]?.toIntOrNull()
-        if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, MessageResponse("El id debe ser un número"))
-            return@get
-        }
-        val pkg = PackageService.getById(id)
-        if (pkg == null) {
-            call.respond(HttpStatusCode.NotFound, MessageResponse("Paquete no encontrado"))
-            return@get
-        }
+            ?: return@get call.respond(HttpStatusCode.BadRequest, MessageResponse("id inválido"))
+        val pkg = PackageRepository.findById(id)
+            ?: return@get call.respond(HttpStatusCode.NotFound, MessageResponse("Paquete no encontrado"))
         call.respond(HttpStatusCode.OK, pkg)
     }
 
@@ -35,21 +30,14 @@ fun Route.packageRoutes() {
         }
     }
 
-    //  editar paquete
     patch("/packages/{id}") {
         call.requireAuth { userId ->
             val id = call.parameters["id"]?.toIntOrNull()
-            if (id == null) {
-                call.respond(HttpStatusCode.BadRequest, MessageResponse("El id debe ser un número"))
-                return@requireAuth
-            }
+                ?: return@requireAuth call.respond(HttpStatusCode.BadRequest, MessageResponse("id inválido"))
             val body = call.receive<UpdatePackageRequest>()
             try {
                 val updated = PackageService.update(id, userId, body)
-                if (updated == null) {
-                    call.respond(HttpStatusCode.NotFound, MessageResponse("Paquete no encontrado"))
-                    return@requireAuth
-                }
+                    ?: return@requireAuth call.respond(HttpStatusCode.NotFound, MessageResponse("Paquete no encontrado"))
                 call.respond(HttpStatusCode.OK, updated)
             } catch (e: IllegalArgumentException) {
                 call.respond(HttpStatusCode.Forbidden, MessageResponse(e.message ?: "Sin permiso"))
@@ -60,16 +48,10 @@ fun Route.packageRoutes() {
     delete("/packages/{id}") {
         call.requireAuth { userId ->
             val id = call.parameters["id"]?.toIntOrNull()
-            if (id == null) {
-                call.respond(HttpStatusCode.BadRequest, MessageResponse("El id debe ser un numero"))
-                return@requireAuth
-            }
+                ?: return@requireAuth call.respond(HttpStatusCode.BadRequest, MessageResponse("id inválido"))
             try {
-                val eliminado = PackageService.delete(id, userId)
-                if (!eliminado) {
-                    call.respond(HttpStatusCode.NotFound, MessageResponse("Paquete no encontrado"))
-                    return@requireAuth
-                }
+                if (!PackageService.delete(id, userId))
+                    return@requireAuth call.respond(HttpStatusCode.NotFound, MessageResponse("Paquete no encontrado"))
                 call.respond(HttpStatusCode.OK, MessageResponse("Paquete eliminado"))
             } catch (e: IllegalArgumentException) {
                 call.respond(HttpStatusCode.Forbidden, MessageResponse(e.message ?: "Sin permiso"))
@@ -77,10 +59,17 @@ fun Route.packageRoutes() {
         }
     }
 
+    // paquetes originales del usuario autenticado
     get("/users/me/packages") {
         call.requireAuth { userId ->
-            val all = PackageService.getAll().filter { it.userId == userId }
-            call.respond(HttpStatusCode.OK, all)
+            call.respond(HttpStatusCode.OK, PackageRepository.findOwnedByUser(userId))
+        }
+    }
+
+    // paquetes copiados (fork) del usuario autenticado
+    get("/users/me/packages/forked") {
+        call.requireAuth { userId ->
+            call.respond(HttpStatusCode.OK, PackageRepository.findForkedByUser(userId))
         }
     }
 }

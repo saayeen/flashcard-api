@@ -11,7 +11,9 @@ data class FlashcardPackage(
     val category: String,
     val cardCount: Int = 0,
     val isPublic: Boolean = true,
-    val theme: String = "default"
+    val theme: String = "default",
+    val forkedFromId: Int? = null,        // ← nuevo
+    val originalAuthorId: String? = null  // ← nuevo
 )
 
 @Serializable
@@ -23,7 +25,6 @@ data class CreatePackageRequest(
     val theme: String = "blue"
 )
 
-// ← NUEVO
 @Serializable
 data class UpdatePackageRequest(
     val name: String? = null,
@@ -33,6 +34,4 @@ data class UpdatePackageRequest(
 )
 
 @Serializable
-data class MessageResponse(
-    val message: String
-)
+data class MessageResponse(val message: String)
