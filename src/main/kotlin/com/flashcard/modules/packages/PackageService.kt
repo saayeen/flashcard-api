@@ -13,7 +13,8 @@ object PackageService {
             description = body.description.trim(),
             category    = body.category.trim(),
             isPublic    = body.isPublic,
-            theme       = body.theme
+            theme       = body.theme,
+            tags        = body.tags.map { it.trim().lowercase() }.filter { it.isNotBlank() }
         )
     }
 
@@ -26,7 +27,8 @@ object PackageService {
             name        = body.name?.trim(),
             description = body.description?.trim(),
             category    = body.category?.trim(),
-            isPublic    = body.isPublic
+            isPublic    = body.isPublic,
+            tags        = body.tags?.map { it.trim().lowercase() }?.filter { it.isNotBlank() }
         )
     }
 

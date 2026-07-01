@@ -7,6 +7,10 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 object PackageRepository {
 
+    // convierte "historia,chile,paes" → listOf("historia","chile","paes")
+    private fun parseTags(raw: String): List<String> =
+        raw.split(",").map { it.trim() }.filter { it.isNotBlank() }
+
     private fun rowToPackage(row: ResultRow) = FlashcardPackage(
         id               = row[PackagesTable.id],
         userId           = row[PackagesTable.userId],
@@ -16,11 +20,11 @@ object PackageRepository {
         cardCount        = row[PackagesTable.cardCount],
         isPublic         = row[PackagesTable.isPublic],
         theme            = row[PackagesTable.theme] ?: "default",
+        tags             = parseTags(row[PackagesTable.tags]),
         forkedFromId     = row[PackagesTable.forkedFromId],
         originalAuthorId = row[PackagesTable.originalAuthorId]
     )
 
-    // todos los públicos (Home / Trending)
     fun findAllPublic(): List<FlashcardPackage> = transaction {
         PackagesTable.selectAll()
             .where { PackagesTable.isPublic eq true and PackagesTable.deletedAt.isNull() }
@@ -28,7 +32,6 @@ object PackageRepository {
             .map { rowToPackage(it) }
     }
 
-    // paquetes originales del usuario (creados por él)
     fun findOwnedByUser(userId: String): List<FlashcardPackage> = transaction {
         PackagesTable.selectAll()
             .where {
@@ -40,7 +43,6 @@ object PackageRepository {
             .map { rowToPackage(it) }
     }
 
-    // paquetes copiados (fork) del usuario
     fun findForkedByUser(userId: String): List<FlashcardPackage> = transaction {
         PackagesTable.selectAll()
             .where {
@@ -59,7 +61,11 @@ object PackageRepository {
             .singleOrNull()
     }
 
-    fun create(userId: String, name: String, description: String, category: String, isPublic: Boolean, theme: String): FlashcardPackage = transaction {
+    fun create(
+        userId: String, name: String, description: String,
+        category: String, isPublic: Boolean, theme: String,
+        tags: List<String> = emptyList()
+    ): FlashcardPackage = transaction {
         val newId = PackagesTable.insert {
             it[PackagesTable.userId]      = userId
             it[PackagesTable.name]        = name
@@ -67,16 +73,22 @@ object PackageRepository {
             it[PackagesTable.category]    = category
             it[PackagesTable.isPublic]    = isPublic
             it[PackagesTable.theme]       = theme
+            it[PackagesTable.tags]        = tags.joinToString(",")
         } get PackagesTable.id
         findById(newId)!!
     }
 
-    fun update(id: Int, name: String?, description: String?, category: String?, isPublic: Boolean?): FlashcardPackage? = transaction {
+    fun update(
+        id: Int, name: String?, description: String?,
+        category: String?, isPublic: Boolean?,
+        tags: List<String>? = null
+    ): FlashcardPackage? = transaction {
         PackagesTable.update({ PackagesTable.id eq id }) {
             if (name        != null) it[PackagesTable.name]        = name
             if (description != null) it[PackagesTable.description] = description
             if (category    != null) it[PackagesTable.category]    = category
             if (isPublic    != null) it[PackagesTable.isPublic]    = isPublic
+            if (tags        != null) it[PackagesTable.tags]        = tags.joinToString(",")
         }
         findById(id)
     }

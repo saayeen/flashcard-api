@@ -12,8 +12,9 @@ data class FlashcardPackage(
     val cardCount: Int = 0,
     val isPublic: Boolean = true,
     val theme: String = "default",
-    val forkedFromId: Int? = null,        // ← nuevo
-    val originalAuthorId: String? = null  // ← nuevo
+    val tags: List<String> = emptyList(),       // ← nuevo
+    val forkedFromId: Int? = null,
+    val originalAuthorId: String? = null
 )
 
 @Serializable
@@ -22,7 +23,8 @@ data class CreatePackageRequest(
     val description: String,
     val category: String,
     val isPublic: Boolean = true,
-    val theme: String = "blue"
+    val theme: String = "blue",
+    val tags: List<String> = emptyList()        // ← nuevo
 )
 
 @Serializable
@@ -30,7 +32,8 @@ data class UpdatePackageRequest(
     val name: String? = null,
     val description: String? = null,
     val category: String? = null,
-    val isPublic: Boolean? = null
+    val isPublic: Boolean? = null,
+    val tags: List<String>? = null              // ← nuevo
 )
 
 @Serializable
