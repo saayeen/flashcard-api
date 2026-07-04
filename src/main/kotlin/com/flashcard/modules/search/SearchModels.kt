@@ -9,5 +9,21 @@ data class SearchResult(
     val description: String,
     val category: String,
     val cardCount: Int,
-    val authorName: String
+    val authorName: String,
+    val tags: List<String> = emptyList()
+)
+
+@Serializable
+data class UserResult(
+    val id: String,
+    val name: String,
+    val photoUrl: String? = null,
+    val description: String = "",
+    val packageCount: Int = 0
+)
+
+@Serializable
+data class TagResult(
+    val tag: String,
+    val packageCount: Int
 )

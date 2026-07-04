@@ -10,13 +10,36 @@ fun Route.searchRoutes() {
     get("/search") {
         val query    = call.request.queryParameters["q"]
         val category = call.request.queryParameters["category"]
-        val results  = SearchRepository.search(query, category)
-        call.respond(HttpStatusCode.OK, results)
+        call.respond(HttpStatusCode.OK, SearchRepository.search(query, category))
     }
 
-    // GET /search/trending — paquetes más recientes públicos
+    // GET /search/users?q=juan
+    get("/search/users") {
+        val query = call.request.queryParameters["q"] ?: ""
+        if (query.isBlank()) {
+            call.respond(HttpStatusCode.OK, emptyList<UserResult>())
+            return@get
+        }
+        call.respond(HttpStatusCode.OK, SearchRepository.searchUsers(query))
+    }
+
+    // GET /search/tags?q=historia
+    get("/search/tags") {
+        val query = call.request.queryParameters["q"] ?: ""
+        if (query.isBlank()) {
+            call.respond(HttpStatusCode.OK, emptyList<SearchResult>())
+            return@get
+        }
+        call.respond(HttpStatusCode.OK, SearchRepository.searchByTag(query))
+    }
+
+    // GET /search/popular-tags
+    get("/search/popular-tags") {
+        call.respond(HttpStatusCode.OK, SearchRepository.popularTags())
+    }
+
+    // GET /search/trending
     get("/search/trending") {
-        val results = SearchRepository.trending()
-        call.respond(HttpStatusCode.OK, results)
+        call.respond(HttpStatusCode.OK, SearchRepository.trending())
     }
 }
