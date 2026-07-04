@@ -60,9 +60,9 @@ object SearchRepository {
         users.map { row ->
             val pkgCount = PackagesTable.selectAll()
                 .where {
-                    PackagesTable.userId eq row[UsersTable.id] and
-                            PackagesTable.isPublic eq true and
-                            PackagesTable.deletedAt.isNull()
+                    (PackagesTable.userId eq row[UsersTable.id]) and
+                            (PackagesTable.isPublic eq true) and
+                            (PackagesTable.deletedAt.isNull() as Op<Boolean>)
                 }
                 .count().toInt()
 
