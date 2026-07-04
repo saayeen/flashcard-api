@@ -51,7 +51,7 @@ object SearchRepository {
     fun searchUsers(query: String): List<UserResult> = transaction {
         val users = UsersTable.selectAll()
             .where {
-                UsersTable.isPublic eq true and
+                (UsersTable.isPublic eq true) and
                         (UsersTable.name.lowerCase() like "%${query.lowercase()}%")
             }
             .limit(20)
