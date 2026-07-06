@@ -4,6 +4,8 @@ import com.flashcard.core.database.PackagesTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
+import com.flashcard.core.database.ReviewsTable
+
 
 object PackageRepository {
 
@@ -22,7 +24,8 @@ object PackageRepository {
         theme            = row[PackagesTable.theme] ?: "default",
         tags             = parseTags(row[PackagesTable.tags]),
         forkedFromId     = row[PackagesTable.forkedFromId],
-        originalAuthorId = row[PackagesTable.originalAuthorId]
+        originalAuthorId = row[PackagesTable.originalAuthorId],
+        avgRating        = getAvgRating(row[PackagesTable.id])  // ← nuevo
     )
 
     fun findAllPublic(): List<FlashcardPackage> = transaction {
@@ -102,5 +105,14 @@ object PackageRepository {
             .where { PackagesTable.id eq packageId }
             .map { it[PackagesTable.userId] }
             .firstOrNull()
+    }
+
+    // agrega esta función privada:
+    private fun getAvgRating(packageId: Int): Double? {
+        val ratings = ReviewsTable
+            .select(ReviewsTable.rating)
+            .where { ReviewsTable.packageId eq packageId }
+            .map { it[ReviewsTable.rating].toDouble() }
+        return if (ratings.isEmpty()) null else ratings.average()
     }
 }

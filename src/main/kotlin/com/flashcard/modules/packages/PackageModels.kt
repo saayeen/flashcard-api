@@ -12,9 +12,10 @@ data class FlashcardPackage(
     val cardCount: Int = 0,
     val isPublic: Boolean = true,
     val theme: String = "default",
-    val tags: List<String> = emptyList(),       // ← nuevo
+    val tags: List<String> = emptyList(),
     val forkedFromId: Int? = null,
-    val originalAuthorId: String? = null
+    val originalAuthorId: String? = null,
+    val avgRating: Double? = null  // ← nuevo
 )
 
 @Serializable
