@@ -28,4 +28,8 @@ object CollaborationService {
     fun getReviews(packageId: Int): List<Review> {
         return CollaborationRepository.getReviews(packageId)
     }
+
+    fun deleteReview(userId: String, packageId: Int): Boolean {
+        return CollaborationRepository.deleteReview(userId, packageId)
+    }
 }

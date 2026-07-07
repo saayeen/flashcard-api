@@ -128,6 +128,13 @@ object CollaborationRepository {
             }
     }
 
+    fun deleteReview(userId: String, packageId: Int): Boolean = transaction {
+        ReviewsTable.deleteWhere {
+            ReviewsTable.userId eq userId and (ReviewsTable.packageId eq packageId)
+        } > 0
+    }
+
+
     fun getFollowersCount(userId: String): Int = transaction {
         FollowersTable.selectAll()
             .where { FollowersTable.followingId eq userId }

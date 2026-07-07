@@ -107,4 +107,23 @@ fun Route.collaborationRoutes() {
         val following = CollaborationRepository.isFollowing(currentUserId, targetId)
         call.respond(HttpStatusCode.OK, mapOf("following" to following))
     }
+
+    delete("/packages/{packageId}/reviews") {
+        val userId = call.getUserId()
+        if (userId == null) {
+            call.respond(HttpStatusCode.Unauthorized, mapOf("message" to "Token invalido o ausente"))
+            return@delete
+        }
+        val packageId = call.parameters["packageId"]?.toIntOrNull()
+        if (packageId == null) {
+            call.respond(HttpStatusCode.BadRequest, MessageResponse("packageId inválido"))
+            return@delete
+        }
+        val deleted = CollaborationService.deleteReview(userId, packageId)
+        if (!deleted) {
+            call.respond(HttpStatusCode.NotFound, MessageResponse("Reseña no encontrada"))
+            return@delete
+        }
+        call.respond(HttpStatusCode.OK, MessageResponse("Reseña eliminada"))
+    }
 }
