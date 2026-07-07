@@ -8,9 +8,10 @@ data class Review(
     val userId: String,
     val packageId: Int,
     val rating: Int,
-    val comment: String
+    val comment: String,
+    val userName: String = "",
+    val userPhotoUrl: String? = null
 )
-
 @Serializable
 data class CreateReviewRequest(
     val rating: Int,

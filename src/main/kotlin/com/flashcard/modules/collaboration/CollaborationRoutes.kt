@@ -91,4 +91,20 @@ fun Route.collaborationRoutes() {
         val count = CollaborationRepository.getFollowingCount(userId)
         call.respond(HttpStatusCode.OK, mapOf("count" to count))
     }
+
+    // GET /users/{id}/is-following — ¿el usuario actual sigue a este perfil?
+    get("/users/{id}/is-following") {
+        val currentUserId = call.getUserId()
+        if (currentUserId == null) {
+            call.respond(HttpStatusCode.OK, mapOf("following" to false))
+            return@get
+        }
+        val targetId = call.parameters["id"]
+        if (targetId == null) {
+            call.respond(HttpStatusCode.BadRequest, MessageResponse("id invalido"))
+            return@get
+        }
+        val following = CollaborationRepository.isFollowing(currentUserId, targetId)
+        call.respond(HttpStatusCode.OK, mapOf("following" to following))
+    }
 }

@@ -6,7 +6,6 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import com.flashcard.core.database.ReviewsTable
 
-
 object PackageRepository {
 
     // convierte "historia,chile,paes" → listOf("historia","chile","paes")
@@ -112,7 +111,7 @@ object PackageRepository {
         val ratings = ReviewsTable
             .select(ReviewsTable.rating)
             .where { ReviewsTable.packageId eq packageId }
-            .map { it[ReviewsTable.rating].toDouble() }
+            .map { it[ReviewsTable.rating] }
         return if (ratings.isEmpty()) null else ratings.average()
     }
 }

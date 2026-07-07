@@ -49,4 +49,19 @@ fun Route.userRoutes() {
             call.respond(HttpStatusCode.OK, updated)
         }
     }
+
+    // GET /users/{id} — perfil público de cualquier usuario
+    get("/users/{id}") {
+        val userId = call.parameters["id"]
+        if (userId == null) {
+            call.respond(HttpStatusCode.BadRequest, mapOf("message" to "id invalido"))
+            return@get
+        }
+        val user = UserService.getProfile(userId)
+        if (user == null) {
+            call.respond(HttpStatusCode.NotFound, mapOf("message" to "Usuario no encontrado"))
+            return@get
+        }
+        call.respond(HttpStatusCode.OK, user)
+    }
 }

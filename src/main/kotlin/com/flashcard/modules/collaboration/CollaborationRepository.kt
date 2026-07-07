@@ -80,36 +80,50 @@ object CollaborationRepository {
 
     // ── Reviews ───────────────────────────────────────────────────
     fun createReview(userId: String, packageId: Int, rating: Int, comment: String): Review = transaction {
+        // verificar si ya existe una reseña de este usuario para este paquete
+        val exists = ReviewsTable.selectAll()
+            .where { ReviewsTable.userId eq userId and (ReviewsTable.packageId eq packageId) }
+            .count() > 0
+
+        require(!exists) { "Ya has reseñado este paquete" }
+
         val newId = ReviewsTable.insert {
-            it[ReviewsTable.userId] = userId
+            it[ReviewsTable.userId]    = userId
             it[ReviewsTable.packageId] = packageId
-            it[ReviewsTable.rating] = rating
-            it[ReviewsTable.comment] = comment
+            it[ReviewsTable.rating]    = rating
+            it[ReviewsTable.comment]   = comment
         } get ReviewsTable.id
 
-        ReviewsTable.selectAll()
+        // devolver con datos del usuario
+        (ReviewsTable innerJoin UsersTable)
+            .selectAll()
             .where { ReviewsTable.id eq newId }
             .map { row ->
                 Review(
-                    id = row[ReviewsTable.id],
-                    userId = row[ReviewsTable.userId],
-                    packageId = row[ReviewsTable.packageId],
-                    rating = row[ReviewsTable.rating],
-                    comment = row[ReviewsTable.comment]
+                    id           = row[ReviewsTable.id],
+                    userId       = row[ReviewsTable.userId],
+                    packageId    = row[ReviewsTable.packageId],
+                    rating       = row[ReviewsTable.rating],
+                    comment      = row[ReviewsTable.comment],
+                    userName     = row[UsersTable.name],
+                    userPhotoUrl = row[UsersTable.photoUrl]
                 )
             }.first()
     }
 
     fun getReviews(packageId: Int): List<Review> = transaction {
-        ReviewsTable.selectAll()
+        (ReviewsTable innerJoin UsersTable)
+            .selectAll()
             .where { ReviewsTable.packageId eq packageId }
             .map { row ->
                 Review(
-                    id = row[ReviewsTable.id],
-                    userId = row[ReviewsTable.userId],
-                    packageId = row[ReviewsTable.packageId],
-                    rating = row[ReviewsTable.rating],
-                    comment = row[ReviewsTable.comment]
+                    id           = row[ReviewsTable.id],
+                    userId       = row[ReviewsTable.userId],
+                    packageId    = row[ReviewsTable.packageId],
+                    rating       = row[ReviewsTable.rating],
+                    comment      = row[ReviewsTable.comment],
+                    userName     = row[UsersTable.name],
+                    userPhotoUrl = row[UsersTable.photoUrl]
                 )
             }
     }
