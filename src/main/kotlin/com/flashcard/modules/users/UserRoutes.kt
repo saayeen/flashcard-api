@@ -96,7 +96,7 @@ fun Route.userRoutes() {
         }
         call.respond(HttpStatusCode.OK, users)
     }
-
+    // GET /users/{id}/is-following — ¿el usuario actual sigue a este perfil?
     get("/users/{id}/is-following") {
         val currentUserId = call.getUserId()
         if (currentUserId == null) {
