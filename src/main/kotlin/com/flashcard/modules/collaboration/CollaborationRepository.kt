@@ -15,24 +15,23 @@ object CollaborationRepository {
             .single()
 
         val newId = PackagesTable.insert {
-            it[PackagesTable.userId] = userId
-            it[PackagesTable.name] = original[PackagesTable.name]
-            it[PackagesTable.description] = original[PackagesTable.description]
-            it[PackagesTable.category] = original[PackagesTable.category]
-            it[PackagesTable.isPublic] = false
-            it[PackagesTable.forkedFromId] = originalId
+            it[PackagesTable.userId]          = userId
+            it[PackagesTable.name]            = original[PackagesTable.name]
+            it[PackagesTable.description]     = original[PackagesTable.description]
+            it[PackagesTable.category]        = original[PackagesTable.category]
+            it[PackagesTable.isPublic]        = false
+            it[PackagesTable.forkedFromId]    = originalId
             it[PackagesTable.originalAuthorId] = original[PackagesTable.userId]
         } get PackagesTable.id
 
-        // copiar todas las tarjetas del paquete original
         val originalCards = CardsTable.selectAll()
             .where { CardsTable.packageId eq originalId and (CardsTable.deletedAt.isNull()) }
 
         for (card in originalCards) {
             CardsTable.insert {
                 it[CardsTable.packageId] = newId
-                it[CardsTable.question] = card[CardsTable.question]
-                it[CardsTable.answer] = card[CardsTable.answer]
+                it[CardsTable.question]  = card[CardsTable.question]
+                it[CardsTable.answer]    = card[CardsTable.answer]
             }
         }
 
@@ -41,50 +40,80 @@ object CollaborationRepository {
             .map { row ->
                 FlashcardPackage(
                     id          = row[PackagesTable.id],
-                    userId      = row[PackagesTable.userId],  // ← agregar esto
+                    userId      = row[PackagesTable.userId],
                     name        = row[PackagesTable.name],
                     description = row[PackagesTable.description],
                     category    = row[PackagesTable.category],
                     cardCount   = row[PackagesTable.cardCount],
                     isPublic    = row[PackagesTable.isPublic],
-                    theme       = row[PackagesTable.theme] ?: "default"  // ← y esto
+                    theme       = row[PackagesTable.theme] ?: "default"
                 )
             }.first()
     }
 
-    // ── Follow ────────────────────────────────────────────────────
-    fun follow(followerId: String, followingId: String): Boolean = transaction {
-        try {
+    // ── Follow (toggle) ───────────────────────────────────────────
+    // devuelve true si ahora sigue, false si dejó de seguir
+    fun toggleFollow(followerId: String, followingId: String): Boolean = transaction {
+        val exists = FollowersTable.selectAll()
+            .where {
+                FollowersTable.followerId eq followerId and
+                        (FollowersTable.followingId eq followingId)
+            }.count() > 0
+
+        if (exists) {
+            FollowersTable.deleteWhere {
+                FollowersTable.followerId eq followerId and
+                        (FollowersTable.followingId eq followingId)
+            }
+            false // dejó de seguir
+        } else {
             FollowersTable.insert {
-                it[FollowersTable.followerId] = followerId
+                it[FollowersTable.followerId]  = followerId
                 it[FollowersTable.followingId] = followingId
             }
-            true
-        } catch (e: Exception) {
-            false
+            true // ahora sigue
         }
-    }
-
-    fun unfollow(followerId: String, followingId: String): Boolean = transaction {
-        val deleted = FollowersTable.deleteWhere {
-            FollowersTable.followerId eq followerId and (FollowersTable.followingId eq followingId)
-        }
-        deleted > 0
     }
 
     fun isFollowing(followerId: String, followingId: String): Boolean = transaction {
         FollowersTable.selectAll()
-            .where { FollowersTable.followerId eq followerId and (FollowersTable.followingId eq followingId) }
-            .count() > 0
+            .where {
+                FollowersTable.followerId eq followerId and
+                        (FollowersTable.followingId eq followingId)
+            }.count() > 0
+    }
+
+    fun getFollowersCount(userId: String): Int = transaction {
+        FollowersTable.selectAll()
+            .where { FollowersTable.followingId eq userId }
+            .count().toInt()
+    }
+
+    fun getFollowingCount(userId: String): Int = transaction {
+        FollowersTable.selectAll()
+            .where { FollowersTable.followerId eq userId }
+            .count().toInt()
+    }
+
+    // lista de usuarios que siguen a userId
+    fun getFollowers(userId: String): List<String> = transaction {
+        FollowersTable.selectAll()
+            .where { FollowersTable.followingId eq userId }
+            .map { it[FollowersTable.followerId] }
+    }
+
+    // lista de usuarios a los que userId sigue
+    fun getFollowing(userId: String): List<String> = transaction {
+        FollowersTable.selectAll()
+            .where { FollowersTable.followerId eq userId }
+            .map { it[FollowersTable.followingId] }
     }
 
     // ── Reviews ───────────────────────────────────────────────────
     fun createReview(userId: String, packageId: Int, rating: Int, comment: String): Review = transaction {
-        // verificar si ya existe una reseña de este usuario para este paquete
         val exists = ReviewsTable.selectAll()
             .where { ReviewsTable.userId eq userId and (ReviewsTable.packageId eq packageId) }
             .count() > 0
-
         require(!exists) { "Ya has reseñado este paquete" }
 
         val newId = ReviewsTable.insert {
@@ -94,7 +123,6 @@ object CollaborationRepository {
             it[ReviewsTable.comment]   = comment
         } get ReviewsTable.id
 
-        // devolver con datos del usuario
         (ReviewsTable innerJoin UsersTable)
             .selectAll()
             .where { ReviewsTable.id eq newId }
@@ -134,17 +162,21 @@ object CollaborationRepository {
         } > 0
     }
 
-
-    fun getFollowersCount(userId: String): Int = transaction {
-        FollowersTable.selectAll()
-            .where { FollowersTable.followingId eq userId }
-            .count().toInt()
+    // mantener compatibilidad con código existente
+    fun follow(followerId: String, followingId: String): Boolean = transaction {
+        try {
+            FollowersTable.insert {
+                it[FollowersTable.followerId]  = followerId
+                it[FollowersTable.followingId] = followingId
+            }
+            true
+        } catch (e: Exception) { false }
     }
 
-    fun getFollowingCount(userId: String): Int = transaction {
-        FollowersTable.selectAll()
-            .where { FollowersTable.followerId eq userId }
-            .count().toInt()
+    fun unfollow(followerId: String, followingId: String): Boolean = transaction {
+        FollowersTable.deleteWhere {
+            FollowersTable.followerId eq followerId and
+                    (FollowersTable.followingId eq followingId)
+        } > 0
     }
-
 }
