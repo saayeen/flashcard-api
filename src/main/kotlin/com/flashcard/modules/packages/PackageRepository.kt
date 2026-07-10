@@ -1,6 +1,7 @@
 package com.flashcard.modules.packages
 
 import com.flashcard.core.database.PackagesTable
+import com.flashcard.core.database.UsersTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -12,9 +13,17 @@ object PackageRepository {
     private fun parseTags(raw: String): List<String> =
         raw.split(",").map { it.trim() }.filter { it.isNotBlank() }
 
+    // query base con el join a users (LEFT JOIN por si el usuario fue eliminado)
+    private fun baseQuery() =
+        PackagesTable
+            .join(UsersTable, JoinType.LEFT, additionalConstraint = { PackagesTable.userId eq UsersTable.id })
+            .selectAll()
+
     private fun rowToPackage(row: ResultRow) = FlashcardPackage(
         id               = row[PackagesTable.id],
         userId           = row[PackagesTable.userId],
+        userName         = row.getOrNull(UsersTable.name) ?: "Usuario eliminado",
+        userPhotoUrl     = row.getOrNull(UsersTable.photoUrl),
         name             = row[PackagesTable.name],
         description      = row[PackagesTable.description],
         category         = row[PackagesTable.category],
@@ -24,18 +33,18 @@ object PackageRepository {
         tags             = parseTags(row[PackagesTable.tags]),
         forkedFromId     = row[PackagesTable.forkedFromId],
         originalAuthorId = row[PackagesTable.originalAuthorId],
-        avgRating        = getAvgRating(row[PackagesTable.id])  // ← nuevo
+        avgRating        = getAvgRating(row[PackagesTable.id])
     )
 
     fun findAllPublic(): List<FlashcardPackage> = transaction {
-        PackagesTable.selectAll()
+        baseQuery()
             .where { PackagesTable.isPublic eq true and PackagesTable.deletedAt.isNull() }
             .orderBy(PackagesTable.id, SortOrder.DESC)
             .map { rowToPackage(it) }
     }
 
     fun findOwnedByUser(userId: String): List<FlashcardPackage> = transaction {
-        PackagesTable.selectAll()
+        baseQuery()
             .where {
                 PackagesTable.userId eq userId and
                         PackagesTable.deletedAt.isNull() and
@@ -46,7 +55,7 @@ object PackageRepository {
     }
 
     fun findForkedByUser(userId: String): List<FlashcardPackage> = transaction {
-        PackagesTable.selectAll()
+        baseQuery()
             .where {
                 PackagesTable.userId eq userId and
                         PackagesTable.deletedAt.isNull() and
@@ -57,7 +66,7 @@ object PackageRepository {
     }
 
     fun findById(id: Int): FlashcardPackage? = transaction {
-        PackagesTable.selectAll()
+        baseQuery()
             .where { PackagesTable.id eq id }
             .map { rowToPackage(it) }
             .singleOrNull()
@@ -106,7 +115,6 @@ object PackageRepository {
             .firstOrNull()
     }
 
-    // agrega esta función privada:
     private fun getAvgRating(packageId: Int): Double? {
         val ratings = ReviewsTable
             .select(ReviewsTable.rating)
