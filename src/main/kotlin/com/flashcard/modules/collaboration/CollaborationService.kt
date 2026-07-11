@@ -24,9 +24,10 @@ object CollaborationService {
 
     fun createReview(userId: String, packageId: Int, body: CreateReviewRequest): Review {
         require(body.rating in 1..5) { "El rating debe ser entre 1 y 5" }
-        val ownerId = PackageRepository.getOwnerId(packageId)
+        val pkg = PackageRepository.findById(packageId)
             ?: throw IllegalArgumentException("Paquete no encontrado")
-        require(userId != ownerId) { "No puedes reseñar tu propio paquete" }
+        require(userId != pkg.userId) { "No puedes reseñar tu propio paquete" }
+        require(userId != pkg.originalAuthorId) { "No puedes reseñar un paquete que creaste originalmente" }
         return CollaborationRepository.createReview(userId, packageId, body.rating, body.comment)
     }
 

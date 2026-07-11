@@ -21,7 +21,7 @@ object CollaborationRepository {
             it[PackagesTable.category]        = original[PackagesTable.category]
             it[PackagesTable.isPublic]        = false
             it[PackagesTable.forkedFromId]    = originalId
-            it[PackagesTable.originalAuthorId] = original[PackagesTable.userId]
+            it[PackagesTable.originalAuthorId] = original[PackagesTable.originalAuthorId] ?: original[PackagesTable.userId]
         } get PackagesTable.id
 
         val originalCards = CardsTable.selectAll()
@@ -43,16 +43,18 @@ object CollaborationRepository {
             .where { PackagesTable.id eq newId }
             .map { row ->
                 FlashcardPackage(
-                    id           = row[PackagesTable.id],
-                    userId       = row[PackagesTable.userId],
-                    name         = row[PackagesTable.name],
-                    description  = row[PackagesTable.description],
-                    category     = row[PackagesTable.category],
-                    cardCount    = row[PackagesTable.cardCount],
-                    isPublic     = row[PackagesTable.isPublic],
-                    theme        = row[PackagesTable.theme] ?: "default",
-                    userName     = row[UsersTable.name],
-                    userPhotoUrl = row[UsersTable.photoUrl]
+                    id               = row[PackagesTable.id],
+                    userId           = row[PackagesTable.userId],
+                    name             = row[PackagesTable.name],
+                    description      = row[PackagesTable.description],
+                    category         = row[PackagesTable.category],
+                    cardCount        = row[PackagesTable.cardCount],
+                    isPublic         = row[PackagesTable.isPublic],
+                    theme            = row[PackagesTable.theme] ?: "default",
+                    userName         = row[UsersTable.name],
+                    userPhotoUrl     = row[UsersTable.photoUrl],
+                    forkedFromId     = row[PackagesTable.forkedFromId],
+                    originalAuthorId = row[PackagesTable.originalAuthorId]
                 )
             }.first()
     }
