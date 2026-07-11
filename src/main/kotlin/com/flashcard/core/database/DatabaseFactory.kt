@@ -46,10 +46,11 @@ object DatabaseFactory {
 
     private fun crearTablas() {
         transaction {
-            SchemaUtils.create(
+            SchemaUtils.createMissingTablesAndColumns(
                 PackagesTable, UsersTable, CardsTable,
                 StudySessionsTable, CardReviewsTable,
-                FollowersTable, ReviewsTable, FoldersTable
+                FollowersTable, ReviewsTable, FoldersTable,
+                FolderPackagesTable
             )
             logger.info("Tablas creadas/verificadas correctamente")
         }

@@ -21,5 +21,6 @@ data class CreateReviewRequest(
 @Serializable
 data class FollowResponse(
     val message: String,
-    val following: Boolean
+    val following: Boolean,
+    val followersCount: Int
 )

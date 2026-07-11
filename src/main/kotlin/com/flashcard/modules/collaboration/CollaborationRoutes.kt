@@ -39,10 +39,7 @@ fun Route.collaborationRoutes() {
 
         val nowFollowing = CollaborationRepository.toggleFollow(followerId, followingId)
         val followersCount = CollaborationRepository.getFollowersCount(followingId)
-        call.respond(HttpStatusCode.OK, mapOf(
-            "following" to nowFollowing,
-            "followersCount" to followersCount
-        ))
+        call.respond(HttpStatusCode.OK, FollowResponse(nowFollowing, followersCount))
     }
 
     // GET /users/{id}/is-following
@@ -54,9 +51,7 @@ fun Route.collaborationRoutes() {
         }
         val targetId = call.parameters["id"]
             ?: return@get call.respond(HttpStatusCode.BadRequest, MessageResponse("id invalido"))
-        call.respond(HttpStatusCode.OK, mapOf(
-            "following" to CollaborationRepository.isFollowing(currentUserId, targetId)
-        ))
+        call.respond(HttpStatusCode.OK, mapOf("following" to false))
     }
 
     // GET /users/{id}/followers/count
