@@ -102,15 +102,20 @@ fun Route.collaborationRoutes() {
         call.respond(HttpStatusCode.OK, CollaborationService.getReviews(packageId))
     }
 
-    // POST /packages/{id}/reviews
+
+// POST /packages/{id}/reviews
     post("/packages/{id}/reviews") {
         val userId = call.getUserId()
             ?: return@post call.respond(HttpStatusCode.Unauthorized, mapOf("message" to "Token invalido o ausente"))
         val packageId = call.parameters["id"]?.toIntOrNull()
             ?: return@post call.respond(HttpStatusCode.BadRequest, MessageResponse("id invalido"))
         val body = call.receive<CreateReviewRequest>()
-        val review = CollaborationService.createReview(userId, packageId, body)
-        call.respond(HttpStatusCode.Created, review)
+        try {
+            val review = CollaborationService.createReview(userId, packageId, body)
+            call.respond(HttpStatusCode.Created, review)
+        } catch (e: IllegalArgumentException) {
+            call.respond(HttpStatusCode.BadRequest, MessageResponse(e.message ?: "Solicitud inválida"))
+        }
     }
 
     // DELETE /packages/{packageId}/reviews

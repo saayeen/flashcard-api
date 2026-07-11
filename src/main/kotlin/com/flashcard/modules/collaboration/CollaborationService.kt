@@ -1,5 +1,5 @@
 package com.flashcard.modules.collaboration
-
+import com.flashcard.modules.packages.PackageRepository
 import com.flashcard.modules.packages.FlashcardPackage
 
 object CollaborationService {
@@ -24,6 +24,9 @@ object CollaborationService {
 
     fun createReview(userId: String, packageId: Int, body: CreateReviewRequest): Review {
         require(body.rating in 1..5) { "El rating debe ser entre 1 y 5" }
+        val ownerId = PackageRepository.getOwnerId(packageId)
+            ?: throw IllegalArgumentException("Paquete no encontrado")
+        require(userId != ownerId) { "No puedes reseñar tu propio paquete" }
         return CollaborationRepository.createReview(userId, packageId, body.rating, body.comment)
     }
 
