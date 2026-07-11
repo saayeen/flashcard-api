@@ -13,10 +13,12 @@ object CollaborationService {
         val already = CollaborationRepository.isFollowing(followerId, followingId)
         return if (already) {
             CollaborationRepository.unfollow(followerId, followingId)
-            FollowResponse("Dejaste de seguir al usuario", false)
+            val count = CollaborationRepository.getFollowersCount(followingId)
+            FollowResponse(message = "Dejaste de seguir al usuario", following = false, followersCount = count)
         } else {
             CollaborationRepository.follow(followerId, followingId)
-            FollowResponse("Ahora sigues al usuario", true)
+            val count = CollaborationRepository.getFollowersCount(followingId)
+            FollowResponse(message = "Ahora sigues al usuario", following = true, followersCount = count)
         }
     }
 

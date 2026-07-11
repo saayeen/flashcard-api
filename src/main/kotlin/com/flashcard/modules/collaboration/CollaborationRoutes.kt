@@ -39,7 +39,8 @@ fun Route.collaborationRoutes() {
 
         val nowFollowing = CollaborationRepository.toggleFollow(followerId, followingId)
         val followersCount = CollaborationRepository.getFollowersCount(followingId)
-        call.respond(HttpStatusCode.OK, FollowResponse(nowFollowing, followersCount))
+        val message = if (nowFollowing) "Ahora sigues al usuario" else "Dejaste de seguir al usuario"
+        call.respond(HttpStatusCode.OK, FollowResponse(message = message, following = nowFollowing, followersCount = followersCount))
     }
 
     // GET /users/{id}/is-following
