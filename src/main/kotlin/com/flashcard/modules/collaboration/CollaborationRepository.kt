@@ -35,18 +35,24 @@ object CollaborationRepository {
             }
         }
 
-        PackagesTable.selectAll()
+        // Join con UsersTable para poblar userName/userPhotoUrl del nuevo dueño (userId),
+        // igual que en PackageRepository.baseQuery()
+        PackagesTable
+            .join(UsersTable, JoinType.LEFT, additionalConstraint = { PackagesTable.userId eq UsersTable.id })
+            .selectAll()
             .where { PackagesTable.id eq newId }
             .map { row ->
                 FlashcardPackage(
-                    id          = row[PackagesTable.id],
-                    userId      = row[PackagesTable.userId],
-                    name        = row[PackagesTable.name],
-                    description = row[PackagesTable.description],
-                    category    = row[PackagesTable.category],
-                    cardCount   = row[PackagesTable.cardCount],
-                    isPublic    = row[PackagesTable.isPublic],
-                    theme       = row[PackagesTable.theme] ?: "default"
+                    id           = row[PackagesTable.id],
+                    userId       = row[PackagesTable.userId],
+                    name         = row[PackagesTable.name],
+                    description  = row[PackagesTable.description],
+                    category     = row[PackagesTable.category],
+                    cardCount    = row[PackagesTable.cardCount],
+                    isPublic     = row[PackagesTable.isPublic],
+                    theme        = row[PackagesTable.theme] ?: "default",
+                    userName     = row[UsersTable.name],
+                    userPhotoUrl = row[UsersTable.photoUrl]
                 )
             }.first()
     }

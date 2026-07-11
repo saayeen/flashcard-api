@@ -29,7 +29,7 @@ dependencies {
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.server.status.pages)
     implementation(libs.ktor.server.config.yaml)
-    implementation("io.ktor:ktor-server-cors:3.1.3")
+    implementation(libs.ktor.server.cors)
     implementation(libs.logback.classic)
 
     testImplementation(kotlin("test"))
