@@ -19,14 +19,19 @@ object PackageService {
     }
 
     fun update(id: Int, userId: String, body: UpdatePackageRequest): FlashcardPackage? {
-        val owner = PackageRepository.getOwnerId(id)
+        val existing = PackageRepository.findById(id)
             ?: throw IllegalArgumentException("Paquete no encontrado")
-        require(owner == userId) { "No tienes permiso para editar este paquete" }
+        require(existing.userId == userId) { "No tienes permiso para editar este paquete" }
+
+        // los paquetes forkeados no pueden cambiar nombre ni categoría —
+        // deben mantener coherencia con el paquete original
+        val isFork = existing.forkedFromId != null
+
         return PackageRepository.update(
             id          = id,
-            name        = body.name?.trim(),
+            name        = if (isFork) null else body.name?.trim(),
             description = body.description?.trim(),
-            category    = body.category?.trim(),
+            category    = if (isFork) null else body.category?.trim(),
             isPublic    = body.isPublic,
             tags        = body.tags?.map { it.trim().lowercase() }?.filter { it.isNotBlank() }
         )
