@@ -3,7 +3,6 @@ package com.flashcard.modules.packages
 import kotlinx.serialization.Serializable
 
 @Serializable
-@Serializable
 data class FlashcardPackage(
     val id: Int,
     val userId: String,
