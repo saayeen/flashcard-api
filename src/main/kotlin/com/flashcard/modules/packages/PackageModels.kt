@@ -18,6 +18,7 @@ data class FlashcardPackage(
     val forkedFromId: Int? = null,
     val originalAuthorId: String? = null,
     val originalAuthorName: String? = null,
+    val originalAuthorPhotoUrl: String? = null,
     val avgRating: Double? = null
 )
 

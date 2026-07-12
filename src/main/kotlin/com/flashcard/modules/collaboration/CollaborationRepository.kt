@@ -25,19 +25,20 @@ object CollaborationRepository {
             }
             .map { row ->
                 FlashcardPackage(
-                    id                 = row[PackagesTable.id],
-                    userId             = row[PackagesTable.userId],
-                    name               = row[PackagesTable.name],
-                    description        = row[PackagesTable.description],
-                    category           = row[PackagesTable.category],
-                    cardCount          = row[PackagesTable.cardCount],
-                    isPublic           = row[PackagesTable.isPublic],
-                    theme              = row[PackagesTable.theme] ?: "default",
-                    userName           = row[UsersTable.name],
-                    userPhotoUrl       = row[UsersTable.photoUrl],
-                    forkedFromId       = row[PackagesTable.forkedFromId],
-                    originalAuthorId   = row[PackagesTable.originalAuthorId],
-                    originalAuthorName = row.getOrNull(OriginalAuthorAlias[UsersTable.name])
+                    id                     = row[PackagesTable.id],
+                    userId                 = row[PackagesTable.userId],
+                    name                   = row[PackagesTable.name],
+                    description            = row[PackagesTable.description],
+                    category               = row[PackagesTable.category],
+                    cardCount              = row[PackagesTable.cardCount],
+                    isPublic               = row[PackagesTable.isPublic],
+                    theme                  = row[PackagesTable.theme] ?: "default",
+                    userName               = row[UsersTable.name],
+                    userPhotoUrl           = row[UsersTable.photoUrl],
+                    forkedFromId           = row[PackagesTable.forkedFromId],
+                    originalAuthorId       = row[PackagesTable.originalAuthorId],
+                    originalAuthorName     = row.getOrNull(OriginalAuthorAlias[UsersTable.name]),
+                    originalAuthorPhotoUrl = row.getOrNull(OriginalAuthorAlias[UsersTable.photoUrl])
                 )
             }
             .singleOrNull()
@@ -82,19 +83,20 @@ object CollaborationRepository {
             .where { PackagesTable.id eq newId }
             .map { row ->
                 FlashcardPackage(
-                    id                 = row[PackagesTable.id],
-                    userId             = row[PackagesTable.userId],
-                    name               = row[PackagesTable.name],
-                    description        = row[PackagesTable.description],
-                    category           = row[PackagesTable.category],
-                    cardCount          = row[PackagesTable.cardCount],
-                    isPublic           = row[PackagesTable.isPublic],
-                    theme              = row[PackagesTable.theme] ?: "default",
-                    userName           = row[UsersTable.name],
-                    userPhotoUrl       = row[UsersTable.photoUrl],
-                    forkedFromId       = row[PackagesTable.forkedFromId],
-                    originalAuthorId   = row[PackagesTable.originalAuthorId],
-                    originalAuthorName = row.getOrNull(OriginalAuthorAlias[UsersTable.name])
+                    id                     = row[PackagesTable.id],
+                    userId                 = row[PackagesTable.userId],
+                    name                   = row[PackagesTable.name],
+                    description            = row[PackagesTable.description],
+                    category               = row[PackagesTable.category],
+                    cardCount              = row[PackagesTable.cardCount],
+                    isPublic               = row[PackagesTable.isPublic],
+                    theme                  = row[PackagesTable.theme] ?: "default",
+                    userName               = row[UsersTable.name],
+                    userPhotoUrl           = row[UsersTable.photoUrl],
+                    forkedFromId           = row[PackagesTable.forkedFromId],
+                    originalAuthorId       = row[PackagesTable.originalAuthorId],
+                    originalAuthorName     = row.getOrNull(OriginalAuthorAlias[UsersTable.name]),
+                    originalAuthorPhotoUrl = row.getOrNull(OriginalAuthorAlias[UsersTable.photoUrl])
                 )
             }.first()
     }
