@@ -17,7 +17,8 @@ object SearchRepository {
         category    = row[PackagesTable.category],
         cardCount   = row[PackagesTable.cardCount],
         authorName  = row[UsersTable.name],
-        tags        = parseTags(row[PackagesTable.tags])
+        tags        = parseTags(row[PackagesTable.tags]),
+        theme       = row[PackagesTable.theme]
     )
 
     // busca paquetes por nombre o categoría

@@ -2,7 +2,6 @@ package com.flashcard.modules.search
 
 import kotlinx.serialization.Serializable
 
-@Serializable
 data class SearchResult(
     val id: Int,
     val name: String,
@@ -10,7 +9,8 @@ data class SearchResult(
     val category: String,
     val cardCount: Int,
     val authorName: String,
-    val tags: List<String> = emptyList()
+    val tags: List<String>,
+    val theme: String
 )
 
 @Serializable
