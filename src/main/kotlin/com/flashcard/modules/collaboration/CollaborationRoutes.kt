@@ -21,13 +21,38 @@ fun Route.collaborationRoutes() {
     // POST /packages/{id}/fork
     post("/packages/{id}/fork") {
         val userId = call.getUserId()
-            ?: return@post call.respond(HttpStatusCode.Unauthorized, mapOf("message" to "Token invalido o ausente"))
+        if (userId == null) {
+            call.respond(HttpStatusCode.Unauthorized, mapOf("message" to "Token invalido o ausente"))
+            return@post
+        }
         val packageId = call.parameters["id"]?.toIntOrNull()
-            ?: return@post call.respond(HttpStatusCode.BadRequest, MessageResponse("id invalido"))
-        val forked = CollaborationService.forkPackage(packageId, userId)
-        call.respond(HttpStatusCode.Created, forked)
+        if (packageId == null) {
+            call.respond(HttpStatusCode.BadRequest, MessageResponse("id invalido"))
+            return@post
+        }
+        try {
+            val forked = CollaborationService.forkPackage(packageId, userId)
+            call.respond(HttpStatusCode.Created, forked)
+        } catch (e: IllegalStateException) {
+            call.respond(HttpStatusCode.Conflict, MessageResponse("Ya forkeaste este paquete"))
+        }
     }
 
+// para que el botón se deshabilite en el frontend sin esperar el error
+    get("/packages/{id}/fork-status") {
+        val userId = call.getUserId()
+        if (userId == null) {
+            call.respond(HttpStatusCode.Unauthorized, mapOf("message" to "Token invalido o ausente"))
+            return@get
+        }
+        val packageId = call.parameters["id"]?.toIntOrNull()
+        if (packageId == null) {
+            call.respond(HttpStatusCode.BadRequest, MessageResponse("id invalido"))
+            return@get
+        }
+        call.respond(HttpStatusCode.OK, mapOf("forked" to CollaborationService.hasForked(packageId, userId)))
+    }
+//----------------------------------------------------
     // POST /users/{id}/follow — toggle seguir/dejar de seguir
     post("/users/{id}/follow") {
         val followerId = call.getUserId()

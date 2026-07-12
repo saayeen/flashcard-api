@@ -5,7 +5,15 @@ import com.flashcard.modules.packages.FlashcardPackage
 object CollaborationService {
 
     fun forkPackage(originalId: Int, userId: String): FlashcardPackage {
+        val existing = CollaborationRepository.findExistingFork(originalId, userId)
+        if (existing != null) {
+            throw IllegalStateException("Ya forkeaste este paquete")
+        }
         return CollaborationRepository.forkPackage(originalId, userId)
+    }
+
+    fun hasForked(originalId: Int, userId: String): Boolean {
+        return CollaborationRepository.findExistingFork(originalId, userId) != null
     }
 
     fun follow(followerId: String, followingId: String): FollowResponse {

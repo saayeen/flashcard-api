@@ -19,6 +19,9 @@ fun Application.configureCORS() {
 
         allowHost("localhost:5173")
 
+        // Origen que usa la app empaquetada con Capacitor (androidScheme: 'http')
+        allowHost("localhost", schemes = listOf("http"))
+
         if (!isLocal) {
             allowHost(frontendUrl, schemes = listOf("https"))
         }

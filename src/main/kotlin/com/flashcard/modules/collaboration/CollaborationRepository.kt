@@ -9,6 +9,35 @@ import org.jetbrains.exposed.sql.transactions.transaction
 object CollaborationRepository {
 
     // ── Fork ─────────────────────────────────────────────────────
+    //  revisa si este usuario ya tiene una copia forkeada de este paquete
+    fun findExistingFork(originalId: Int, userId: String): FlashcardPackage? = transaction {
+        PackagesTable
+            .join(UsersTable, JoinType.LEFT, additionalConstraint = { PackagesTable.userId eq UsersTable.id })
+            .selectAll()
+            .where {
+                PackagesTable.forkedFromId eq originalId and
+                        (PackagesTable.userId eq userId) and
+                        (PackagesTable.deletedAt.isNull() as Op<Boolean>)
+            }
+            .map { row ->
+                FlashcardPackage(
+                    id               = row[PackagesTable.id],
+                    userId           = row[PackagesTable.userId],
+                    name             = row[PackagesTable.name],
+                    description      = row[PackagesTable.description],
+                    category         = row[PackagesTable.category],
+                    cardCount        = row[PackagesTable.cardCount],
+                    isPublic         = row[PackagesTable.isPublic],
+                    theme            = row[PackagesTable.theme] ?: "default",
+                    userName         = row[UsersTable.name],
+                    userPhotoUrl     = row[UsersTable.photoUrl],
+                    forkedFromId     = row[PackagesTable.forkedFromId],
+                    originalAuthorId = row[PackagesTable.originalAuthorId]
+                )
+            }
+            .singleOrNull()
+    }
+
     fun forkPackage(originalId: Int, userId: String): FlashcardPackage = transaction {
         val original = PackagesTable.selectAll()
             .where { PackagesTable.id eq originalId }
@@ -35,8 +64,12 @@ object CollaborationRepository {
             }
         }
 
-        // Join con UsersTable para poblar userName/userPhotoUrl del nuevo dueño (userId),
-        // igual que en PackageRepository.baseQuery()
+        // arreglo del cardCount
+        val totalCards = originalCards.count().toInt()
+        PackagesTable.update({ PackagesTable.id eq newId }) {
+            it[PackagesTable.cardCount] = totalCards
+        }
+
         PackagesTable
             .join(UsersTable, JoinType.LEFT, additionalConstraint = { PackagesTable.userId eq UsersTable.id })
             .selectAll()
@@ -58,6 +91,7 @@ object CollaborationRepository {
                 )
             }.first()
     }
+
 
     // ── Follow (toggle) ───────────────────────────────────────────
     // devuelve true si ahora sigue, false si dejó de seguir
