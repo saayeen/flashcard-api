@@ -23,8 +23,6 @@ object PackageService {
             ?: throw IllegalArgumentException("Paquete no encontrado")
         require(existing.userId == userId) { "No tienes permiso para editar este paquete" }
 
-        // los paquetes forkeados no pueden cambiar nombre ni categoría —
-        // deben mantener coherencia con el paquete original
         val isFork = existing.forkedFromId != null
 
         return PackageRepository.update(
@@ -33,6 +31,7 @@ object PackageService {
             description = body.description?.trim(),
             category    = if (isFork) null else body.category?.trim(),
             isPublic    = body.isPublic,
+            theme       = body.theme,
             tags        = body.tags?.map { it.trim().lowercase() }?.filter { it.isNotBlank() }
         )
     }

@@ -37,6 +37,7 @@ data class UpdatePackageRequest(
     val description: String? = null,
     val category: String? = null,
     val isPublic: Boolean? = null,
+    val theme: String? = null,
     val tags: List<String>? = null              // ← nuevo
 )
 

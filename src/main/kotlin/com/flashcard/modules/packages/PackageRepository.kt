@@ -98,6 +98,7 @@ object PackageRepository {
     fun update(
         id: Int, name: String?, description: String?,
         category: String?, isPublic: Boolean?,
+        theme: String? = null,
         tags: List<String>? = null
     ): FlashcardPackage? = transaction {
         PackagesTable.update({ PackagesTable.id eq id }) {
@@ -105,6 +106,7 @@ object PackageRepository {
             if (description != null) it[PackagesTable.description] = description
             if (category    != null) it[PackagesTable.category]    = category
             if (isPublic    != null) it[PackagesTable.isPublic]    = isPublic
+            if (theme       != null) it[PackagesTable.theme]       = theme
             if (tags        != null) it[PackagesTable.tags]        = tags.joinToString(",")
         }
         findById(id)
