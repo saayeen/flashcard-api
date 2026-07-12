@@ -9,31 +9,37 @@ import com.flashcard.core.database.ReviewsTable
 
 object PackageRepository {
 
+    // alias para poder unir UsersTable dos veces (dueño actual + autor original)
+    private val OriginalAuthorAlias = UsersTable.alias("original_author")
+
     // convierte "historia,chile,paes" → listOf("historia","chile","paes")
     private fun parseTags(raw: String): List<String> =
         raw.split(",").map { it.trim() }.filter { it.isNotBlank() }
 
     // query base con el join a users (LEFT JOIN por si el usuario fue eliminado)
+    // + join adicional para traer el nombre del autor original (si el paquete es un fork)
     private fun baseQuery() =
         PackagesTable
             .join(UsersTable, JoinType.LEFT, additionalConstraint = { PackagesTable.userId eq UsersTable.id })
+            .join(OriginalAuthorAlias, JoinType.LEFT, additionalConstraint = { PackagesTable.originalAuthorId eq OriginalAuthorAlias[UsersTable.id] })
             .selectAll()
 
     private fun rowToPackage(row: ResultRow) = FlashcardPackage(
-        id               = row[PackagesTable.id],
-        userId           = row[PackagesTable.userId],
-        userName         = row.getOrNull(UsersTable.name) ?: "Usuario eliminado",
-        userPhotoUrl     = row.getOrNull(UsersTable.photoUrl),
-        name             = row[PackagesTable.name],
-        description      = row[PackagesTable.description],
-        category         = row[PackagesTable.category],
-        cardCount        = row[PackagesTable.cardCount],
-        isPublic         = row[PackagesTable.isPublic],
-        theme            = row[PackagesTable.theme] ?: "default",
-        tags             = parseTags(row[PackagesTable.tags]),
-        forkedFromId     = row[PackagesTable.forkedFromId],
-        originalAuthorId = row[PackagesTable.originalAuthorId],
-        avgRating        = getAvgRating(row[PackagesTable.id])
+        id                 = row[PackagesTable.id],
+        userId             = row[PackagesTable.userId],
+        userName           = row.getOrNull(UsersTable.name) ?: "Usuario eliminado",
+        userPhotoUrl       = row.getOrNull(UsersTable.photoUrl),
+        name               = row[PackagesTable.name],
+        description        = row[PackagesTable.description],
+        category           = row[PackagesTable.category],
+        cardCount          = row[PackagesTable.cardCount],
+        isPublic           = row[PackagesTable.isPublic],
+        theme              = row[PackagesTable.theme] ?: "default",
+        tags               = parseTags(row[PackagesTable.tags]),
+        forkedFromId       = row[PackagesTable.forkedFromId],
+        originalAuthorId   = row[PackagesTable.originalAuthorId],
+        originalAuthorName = row.getOrNull(OriginalAuthorAlias[UsersTable.name]),
+        avgRating          = getAvgRating(row[PackagesTable.id])
     )
 
     fun findAllPublic(): List<FlashcardPackage> = transaction {

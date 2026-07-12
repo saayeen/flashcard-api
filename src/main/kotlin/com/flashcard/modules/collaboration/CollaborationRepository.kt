@@ -8,11 +8,15 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 object CollaborationRepository {
 
+    // alias para traer el nombre del autor original (igual que en PackageRepository)
+    private val OriginalAuthorAlias = UsersTable.alias("original_author")
+
     // ── Fork ─────────────────────────────────────────────────────
     //  revisa si este usuario ya tiene una copia forkeada de este paquete
     fun findExistingFork(originalId: Int, userId: String): FlashcardPackage? = transaction {
         PackagesTable
             .join(UsersTable, JoinType.LEFT, additionalConstraint = { PackagesTable.userId eq UsersTable.id })
+            .join(OriginalAuthorAlias, JoinType.LEFT, additionalConstraint = { PackagesTable.originalAuthorId eq OriginalAuthorAlias[UsersTable.id] })
             .selectAll()
             .where {
                 PackagesTable.forkedFromId eq originalId and
@@ -21,18 +25,19 @@ object CollaborationRepository {
             }
             .map { row ->
                 FlashcardPackage(
-                    id               = row[PackagesTable.id],
-                    userId           = row[PackagesTable.userId],
-                    name             = row[PackagesTable.name],
-                    description      = row[PackagesTable.description],
-                    category         = row[PackagesTable.category],
-                    cardCount        = row[PackagesTable.cardCount],
-                    isPublic         = row[PackagesTable.isPublic],
-                    theme            = row[PackagesTable.theme] ?: "default",
-                    userName         = row[UsersTable.name],
-                    userPhotoUrl     = row[UsersTable.photoUrl],
-                    forkedFromId     = row[PackagesTable.forkedFromId],
-                    originalAuthorId = row[PackagesTable.originalAuthorId]
+                    id                 = row[PackagesTable.id],
+                    userId             = row[PackagesTable.userId],
+                    name               = row[PackagesTable.name],
+                    description        = row[PackagesTable.description],
+                    category           = row[PackagesTable.category],
+                    cardCount          = row[PackagesTable.cardCount],
+                    isPublic           = row[PackagesTable.isPublic],
+                    theme              = row[PackagesTable.theme] ?: "default",
+                    userName           = row[UsersTable.name],
+                    userPhotoUrl       = row[UsersTable.photoUrl],
+                    forkedFromId       = row[PackagesTable.forkedFromId],
+                    originalAuthorId   = row[PackagesTable.originalAuthorId],
+                    originalAuthorName = row.getOrNull(OriginalAuthorAlias[UsersTable.name])
                 )
             }
             .singleOrNull()
@@ -72,22 +77,24 @@ object CollaborationRepository {
 
         PackagesTable
             .join(UsersTable, JoinType.LEFT, additionalConstraint = { PackagesTable.userId eq UsersTable.id })
+            .join(OriginalAuthorAlias, JoinType.LEFT, additionalConstraint = { PackagesTable.originalAuthorId eq OriginalAuthorAlias[UsersTable.id] })
             .selectAll()
             .where { PackagesTable.id eq newId }
             .map { row ->
                 FlashcardPackage(
-                    id               = row[PackagesTable.id],
-                    userId           = row[PackagesTable.userId],
-                    name             = row[PackagesTable.name],
-                    description      = row[PackagesTable.description],
-                    category         = row[PackagesTable.category],
-                    cardCount        = row[PackagesTable.cardCount],
-                    isPublic         = row[PackagesTable.isPublic],
-                    theme            = row[PackagesTable.theme] ?: "default",
-                    userName         = row[UsersTable.name],
-                    userPhotoUrl     = row[UsersTable.photoUrl],
-                    forkedFromId     = row[PackagesTable.forkedFromId],
-                    originalAuthorId = row[PackagesTable.originalAuthorId]
+                    id                 = row[PackagesTable.id],
+                    userId             = row[PackagesTable.userId],
+                    name               = row[PackagesTable.name],
+                    description        = row[PackagesTable.description],
+                    category           = row[PackagesTable.category],
+                    cardCount          = row[PackagesTable.cardCount],
+                    isPublic           = row[PackagesTable.isPublic],
+                    theme              = row[PackagesTable.theme] ?: "default",
+                    userName           = row[UsersTable.name],
+                    userPhotoUrl       = row[UsersTable.photoUrl],
+                    forkedFromId       = row[PackagesTable.forkedFromId],
+                    originalAuthorId   = row[PackagesTable.originalAuthorId],
+                    originalAuthorName = row.getOrNull(OriginalAuthorAlias[UsersTable.name])
                 )
             }.first()
     }
@@ -107,13 +114,13 @@ object CollaborationRepository {
                 FollowersTable.followerId eq followerId and
                         (FollowersTable.followingId eq followingId)
             }
-            false // dejó de seguir
+            false
         } else {
             FollowersTable.insert {
                 it[FollowersTable.followerId]  = followerId
                 it[FollowersTable.followingId] = followingId
             }
-            true // ahora sigue
+            true
         }
     }
 
@@ -137,14 +144,12 @@ object CollaborationRepository {
             .count().toInt()
     }
 
-    // lista de usuarios que siguen a userId
     fun getFollowers(userId: String): List<String> = transaction {
         FollowersTable.selectAll()
             .where { FollowersTable.followingId eq userId }
             .map { it[FollowersTable.followerId] }
     }
 
-    // lista de usuarios a los que userId sigue
     fun getFollowing(userId: String): List<String> = transaction {
         FollowersTable.selectAll()
             .where { FollowersTable.followerId eq userId }
@@ -204,7 +209,6 @@ object CollaborationRepository {
         } > 0
     }
 
-    // mantener compatibilidad con código existente
     fun follow(followerId: String, followingId: String): Boolean = transaction {
         try {
             FollowersTable.insert {

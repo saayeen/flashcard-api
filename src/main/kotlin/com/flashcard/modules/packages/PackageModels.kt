@@ -3,6 +3,7 @@ package com.flashcard.modules.packages
 import kotlinx.serialization.Serializable
 
 @Serializable
+@Serializable
 data class FlashcardPackage(
     val id: Int,
     val userId: String,
@@ -17,6 +18,7 @@ data class FlashcardPackage(
     val tags: List<String> = emptyList(),
     val forkedFromId: Int? = null,
     val originalAuthorId: String? = null,
+    val originalAuthorName: String? = null,
     val avgRating: Double? = null
 )
 
