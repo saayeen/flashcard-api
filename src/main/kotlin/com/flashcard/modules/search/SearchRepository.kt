@@ -144,8 +144,6 @@ object SearchRepository {
         if (rated.size >= limit) {
             rated.take(limit)
         } else {
-            // fallback: completa con los más recientes que no tengan rating aún,
-            // para no mostrar una lista vacía o muy corta mientras no hay reseñas
             val ratedIds = rated.map { it.id }.toSet()
             val fillers = allPublic
                 .filter { it.id !in ratedIds }
@@ -153,4 +151,5 @@ object SearchRepository {
             rated + fillers
         }
     }
+}
 
