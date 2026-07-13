@@ -15,7 +15,7 @@ services:
     build: .
     container_name: flashcard-api
     ports:
-      - "8080:8080"
+      - "80:8080"
     depends_on:
       - db
     environment:
