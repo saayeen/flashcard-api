@@ -6,4 +6,5 @@ build/
 *.jar
 local.properties
 .env
+node_modules
 src/main/resources/firebase-service-account.json
