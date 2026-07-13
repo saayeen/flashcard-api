@@ -20,7 +20,7 @@ services:
       - db
     environment:
       - DB_HOST=db
-      - DB_PORT=5432        # dentro de Docker la red interna usa 5432, no 5433
+      - DB_PORT=5432        
       - DB_NAME=flashcard
       - DB_USER=postgres
       - DB_PASSWORD=postgres
