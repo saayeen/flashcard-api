@@ -2,6 +2,7 @@ package com.flashcard.modules.search
 
 import com.flashcard.core.database.PackagesTable
 import com.flashcard.core.database.UsersTable
+import com.flashcard.core.database.ReviewsTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -10,16 +11,29 @@ object SearchRepository {
     private fun parseTags(raw: String): List<String> =
         raw.split(",").map { it.trim() }.filter { it.isNotBlank() }
 
-    private fun rowToResult(row: ResultRow) = SearchResult(
-        id          = row[PackagesTable.id],
-        name        = row[PackagesTable.name],
-        description = row[PackagesTable.description],
-        category    = row[PackagesTable.category],
-        cardCount   = row[PackagesTable.cardCount],
-        authorName  = row[UsersTable.name],
-        tags        = parseTags(row[PackagesTable.tags]),
-        theme       = row[PackagesTable.theme]
-    )
+    private fun getAvgRating(packageId: Int): Pair<Double?, Int> {
+        val ratings = ReviewsTable
+            .select(ReviewsTable.rating)
+            .where { ReviewsTable.packageId eq packageId }
+            .map { it[ReviewsTable.rating] }
+        return if (ratings.isEmpty()) null to 0 else ratings.average() to ratings.size
+    }
+
+    private fun rowToResult(row: ResultRow): SearchResult {
+        val (avgRating, reviewCount) = getAvgRating(row[PackagesTable.id])
+        return SearchResult(
+            id          = row[PackagesTable.id],
+            name        = row[PackagesTable.name],
+            description = row[PackagesTable.description],
+            category    = row[PackagesTable.category],
+            cardCount   = row[PackagesTable.cardCount],
+            authorName  = row[UsersTable.name],
+            tags        = parseTags(row[PackagesTable.tags]),
+            theme       = row[PackagesTable.theme],
+            avgRating   = avgRating,
+            reviewCount = reviewCount
+        )
+    }
 
     // busca paquetes por nombre o categoría
     fun search(query: String?, category: String?): List<SearchResult> = transaction {
@@ -108,17 +122,35 @@ object SearchRepository {
             .map { TagResult(tag = it.key, packageCount = it.value) }
     }
 
-    fun trending(): List<SearchResult> = transaction {
+    fun trending(limit: Int = 10): List<SearchResult> = transaction {
         val join = PackagesTable
             .join(UsersTable, JoinType.INNER, PackagesTable.userId, UsersTable.id)
 
-        join.selectAll()
+        val allPublic = join.selectAll()
             .where {
                 PackagesTable.isPublic eq true and
                         (PackagesTable.deletedAt.isNull() as Op<Boolean>)
             }
             .orderBy(PackagesTable.id, SortOrder.DESC)
-            .limit(10)
             .map { rowToResult(it) }
+
+        val rated = allPublic
+            .filter { it.avgRating != null }
+            .sortedWith(
+                compareByDescending<SearchResult> { it.avgRating }
+                    .thenByDescending { it.reviewCount }
+            )
+
+        if (rated.size >= limit) {
+            rated.take(limit)
+        } else {
+            // fallback: completa con los más recientes que no tengan rating aún,
+            // para no mostrar una lista vacía o muy corta mientras no hay reseñas
+            val ratedIds = rated.map { it.id }.toSet()
+            val fillers = allPublic
+                .filter { it.id !in ratedIds }
+                .take(limit - rated.size)
+            rated + fillers
+        }
     }
-}
+
