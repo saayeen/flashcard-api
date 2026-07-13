@@ -2,10 +2,6 @@ package com.flashcard.modules.search
 
 import kotlinx.serialization.Serializable
 
-package com.flashcard.modules.search
-
-import kotlinx.serialization.Serializable
-
 @Serializable
 data class SearchResult(
     val id: Int,
