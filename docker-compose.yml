@@ -7,10 +7,10 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5433:5432"
+      - "5000:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-
+# define variables como DB_HOST=db, DB_PORT=5432
   api:
     build: .
     container_name: flashcard-api
@@ -19,11 +19,7 @@ services:
     depends_on:
       - db
     environment:
-      - DB_HOST=db
-      - DB_PORT=5432        
-      - DB_NAME=flashcard
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/flashcard
 
 volumes:
   pgdata:
