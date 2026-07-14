@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5000:5432"
+      - "2230:5000"
     volumes:
       - pgdata:/var/lib/postgresql/data
 # define variables como DB_HOST=db, DB_PORT=5432
