@@ -41,8 +41,14 @@ object StatsRepository {
             .where { CardsTable.packageId eq packageId and (CardsTable.deletedAt.isNull()) }
             .count().toInt()
 
-        val reviews = CardReviewsTable.selectAll()
-            .where { CardReviewsTable.userId eq userId }
+
+        // join con CardsTable para filtrar los reviews SOLO de tarjetas de este paquete
+        val reviews = (CardReviewsTable innerJoin CardsTable)
+            .selectAll()
+            .where {
+                CardReviewsTable.userId eq userId and
+                        (CardsTable.packageId eq packageId)
+            }
             .toList()
 
         val nextReview = CardReviewsTable.selectAll()

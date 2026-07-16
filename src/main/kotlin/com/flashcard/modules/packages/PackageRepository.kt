@@ -1,5 +1,5 @@
 package com.flashcard.modules.packages
-
+import java.time.LocalDateTime
 import com.flashcard.core.database.PackagesTable
 import com.flashcard.core.database.UsersTable
 import org.jetbrains.exposed.sql.*
@@ -73,7 +73,7 @@ object PackageRepository {
 
     fun findById(id: Int): FlashcardPackage? = transaction {
         baseQuery()
-            .where { PackagesTable.id eq id }
+            .where { PackagesTable.id eq id and PackagesTable.deletedAt.isNull() }
             .map { rowToPackage(it) }
             .singleOrNull()
     }
@@ -113,7 +113,10 @@ object PackageRepository {
     }
 
     fun delete(id: Int): Boolean = transaction {
-        PackagesTable.deleteWhere { PackagesTable.id eq id } > 0
+        val updated = PackagesTable.update({ PackagesTable.id eq id }) {
+            it[PackagesTable.deletedAt] = LocalDateTime.now()
+        }
+        updated > 0
     }
 
     fun getOwnerId(packageId: Int): String? = transaction {
