@@ -16,6 +16,7 @@ fun Application.configureCORS() {
         allowMethod(HttpMethod.Options)
         allowHeader(HttpHeaders.Authorization)
         allowHeader(HttpHeaders.ContentType)
+        allowNonSimpleContentTypes = true
 
         allowHost("localhost:5173")
 
