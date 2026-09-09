@@ -23,7 +23,7 @@ object PackageService {
             ?: throw IllegalArgumentException("Paquete no encontrado")
         require(existing.userId == userId) { "No tienes permiso para editar este paquete" }
 
-        val isFork = existing.forkedFromId != null
+        val isFork = existing.FforkedFromId != null
 
         return PackageRepository.update(
             id          = id,

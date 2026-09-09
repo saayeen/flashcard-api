@@ -28,8 +28,11 @@ data class CardReview(
 @Serializable
 data class ReviewRequest(
     val cardId: Int,
-    val quality: Int  // 1=Dificil, 2=Casi, 3=Bien, 4=Facil
-)
+    val quality: Int, // 1=Dificil, 2=Casi, 3=Bien, 4=Facil
+    val clientReviewId: String,// UUID generado en el dispositivo
+    val reviewedAt: String //timestamp ISO real del momento de estudio
+    )
+
 
 // resumen al terminar la sesión
 @Serializable

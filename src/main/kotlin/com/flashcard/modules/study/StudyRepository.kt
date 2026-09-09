@@ -69,18 +69,30 @@ object StudyRepository {
         quality: Int,
         easeFactor: Double,
         intervalDays: Int,
-        nextReview: LocalDateTime
+        nextReview: LocalDateTime,
+        reviewedAt: LocalDateTime,
+        clientReviewId: String
     ): CardReview = transaction {
+//  lo que hacce aca si ya procesamos este review antes, devolvemos el existente sin insertar de nuevo
+        val existing = CardReviewsTable.selectAll()
+            .where { CardReviewsTable.clientReviewId eq clientReviewId }
+            .map { rowToReview(it) }
+            .singleOrNull()
+
+        if (existing != null) return@transaction existing
+
         val newId = CardReviewsTable.insert {
-            it[CardReviewsTable.userId]       = userId
-            it[CardReviewsTable.cardId]       = cardId
-            it[CardReviewsTable.sessionId]    = sessionId
-            it[CardReviewsTable.quality]      = quality
-            it[CardReviewsTable.easeFactor]   = easeFactor
-            it[CardReviewsTable.intervalDays] = intervalDays
-            it[CardReviewsTable.nextReview]   = nextReview
-            it[CardReviewsTable.reviewedAt]   = LocalDateTime.now()
+            it[CardReviewsTable.userId]         = userId
+            it[CardReviewsTable.cardId]         = cardId
+            it[CardReviewsTable.sessionId]      = sessionId
+            it[CardReviewsTable.quality]        = quality
+            it[CardReviewsTable.easeFactor]     = easeFactor
+            it[CardReviewsTable.intervalDays]   = intervalDays
+            it[CardReviewsTable.nextReview]     = nextReview
+            it[CardReviewsTable.reviewedAt]     = reviewedAt
+            it[CardReviewsTable.clientReviewId] = clientReviewId
         } get CardReviewsTable.id
+
         CardReviewsTable.selectAll()
             .where { CardReviewsTable.id eq newId }
             .map { rowToReview(it) }

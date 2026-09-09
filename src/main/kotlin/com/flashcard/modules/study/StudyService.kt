@@ -18,14 +18,12 @@ object StudyService {
     ): CardReview {
         require(body.quality in 1..4) { "La calidad debe ser entre 1 y 4" }
 
-        // obtener el último review de esta tarjeta para este usuario
         val lastReview = StudyRepository.getLastReview(userId, body.cardId)
 
         val currentEF       = lastReview?.easeFactor   ?: 2.5
         val currentInterval = lastReview?.intervalDays ?: 1
         val repetitions     = if (lastReview == null) 0 else 1
 
-        // aplicar el algoritmo SM-2
         val result = SM2Algorithm.calculate(
             quality      = body.quality,
             easeFactor   = currentEF,
@@ -33,16 +31,19 @@ object StudyService {
             repetitions  = repetitions
         )
 
-        val nextReview = LocalDateTime.now().plusDays(result.nextReviewDays.toLong())
+        val reviewedAt = LocalDateTime.parse(body.reviewedAt) //  viene del cliente, no de now()
+        val nextReview = reviewedAt.plusDays(result.nextReviewDays.toLong())
 
         return StudyRepository.saveReview(
-            userId       = userId,
-            cardId       = body.cardId,
-            sessionId    = sessionId,
-            quality      = body.quality,
-            easeFactor   = result.easeFactor,
-            intervalDays = result.intervalDays,
-            nextReview   = nextReview
+            userId         = userId,
+            cardId         = body.cardId,
+            sessionId      = sessionId,
+            quality        = body.quality,
+            easeFactor     = result.easeFactor,
+            intervalDays   = result.intervalDays,
+            nextReview     = nextReview,
+            reviewedAt     = reviewedAt,
+            clientReviewId = body.clientReviewId
         )
     }
 

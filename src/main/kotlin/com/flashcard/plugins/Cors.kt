@@ -9,6 +9,7 @@ fun Application.configureCORS() {
     val isLocal = frontendUrl.contains("localhost")
 
     install(CORS) {
+        allowHost("flashcard-frontend-eight.vercel.app", schemes = listOf("https"))
         allowMethod(HttpMethod.Get)
         allowMethod(HttpMethod.Post)
         allowMethod(HttpMethod.Patch)

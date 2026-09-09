@@ -12,3 +12,4 @@ object CardsTable : Table("cards") {
 
     override val primaryKey = PrimaryKey(id)
 }
+
