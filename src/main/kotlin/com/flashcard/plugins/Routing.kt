@@ -19,6 +19,7 @@ fun Application.configureRouting() {
         packageRoutes()
         cardRoutes()
         studyRoutes()
+        deviceRoutes()
         folderRoutes()
         searchRoutes()
         collaborationRoutes()
