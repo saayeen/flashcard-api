@@ -1,5 +1,7 @@
 package com.flashcard.modules.packages
 
+import com.flashcard.modules.cards.CardRepository
+
 object PackageService {
 
     fun getAll(): List<FlashcardPackage> {
@@ -20,7 +22,11 @@ object PackageService {
     }
 
     fun delete(id: Int, userId: String): Boolean {
-        PackageRepository.findById(id) ?: return false
+        val owner = PackageRepository.getOwnerId(id) ?: return false
+        require(owner == userId) { "No tienes permiso para eliminar este paquete" }
+
+        CardRepository.protectDependentForksOnPackageDelete(id)  // 👈 nuevo, antes del borrado
+
         return PackageRepository.delete(id)
     }
 }

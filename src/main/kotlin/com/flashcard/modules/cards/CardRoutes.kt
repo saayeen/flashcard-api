@@ -29,7 +29,7 @@ fun Route.cardRoutes() {
                 return@requireAuth
             }
             val body = call.receive<CreateCardRequest>()
-            val card = CardService.create(packageId, body)
+            val card = CardService.create(packageId, userId, body)   // 👈 se agrega userId
             call.respond(HttpStatusCode.Created, card)
         }
     }
@@ -43,11 +43,7 @@ fun Route.cardRoutes() {
                 return@requireAuth
             }
             val body = call.receive<UpdateCardRequest>()
-            val updated = CardService.update(id, body)
-            if (updated == null) {
-                call.respond(HttpStatusCode.NotFound, MessageResponse("Tarjeta no encontrada"))
-                return@requireAuth
-            }
+            val updated = CardService.update(id, userId, body.question, body.answer)  // 👈 firma nueva
             call.respond(HttpStatusCode.OK, updated)
         }
     }
@@ -60,7 +56,7 @@ fun Route.cardRoutes() {
                 call.respond(HttpStatusCode.BadRequest, MessageResponse("id invalido"))
                 return@requireAuth
             }
-            val eliminado = CardService.delete(id)
+            val eliminado = CardService.delete(id, userId)   // 👈 se agrega userId
             if (!eliminado) {
                 call.respond(HttpStatusCode.NotFound, MessageResponse("Tarjeta no encontrada"))
                 return@requireAuth

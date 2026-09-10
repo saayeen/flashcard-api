@@ -16,6 +16,13 @@ object PackageRepository {
         isPublic    = row[PackagesTable.isPublic]
     )
 
+    fun getOwnerId(packageId: Int): String? = transaction {
+        PackagesTable.selectAll()
+            .where { PackagesTable.id eq packageId }
+            .map { it[PackagesTable.userId] }
+            .singleOrNull()
+    }
+
     fun findAll(): List<FlashcardPackage> = transaction {
         PackagesTable.selectAll().map { rowToPackage(it) }
     }

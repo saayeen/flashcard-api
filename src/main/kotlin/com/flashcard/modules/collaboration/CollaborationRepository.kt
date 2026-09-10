@@ -22,19 +22,10 @@ object CollaborationRepository {
             it[PackagesTable.isPublic] = false
             it[PackagesTable.forkedFromId] = originalId
             it[PackagesTable.originalAuthorId] = original[PackagesTable.userId]
+            it[PackagesTable.cardCount] = original[PackagesTable.cardCount]  // se copia el número, no las filas
         } get PackagesTable.id
 
-        // copiar todas las tarjetas del paquete original
-        val originalCards = CardsTable.selectAll()
-            .where { CardsTable.packageId eq originalId and (CardsTable.deletedAt.isNull()) }
-
-        for (card in originalCards) {
-            CardsTable.insert {
-                it[CardsTable.packageId] = newId
-                it[CardsTable.question] = card[CardsTable.question]
-                it[CardsTable.answer] = card[CardsTable.answer]
-            }
-        }
+        // el fork lee las tarjetas del original en vivo hasta que algo cambie
 
         PackagesTable.selectAll()
             .where { PackagesTable.id eq newId }
