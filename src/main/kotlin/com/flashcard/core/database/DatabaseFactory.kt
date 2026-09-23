@@ -27,8 +27,7 @@ object DatabaseFactory {
         )
 
         transaction {
-            SchemaUtils.create(PackagesTable, UsersTable, CardsTable, StudySessionsTable, CardReviewsTable,
-                FolderPackagesTable, FollowersTable, ReviewsTable)
+            SchemaUtils.create(PackagesTable, UsersTable, CardsTable, StudySessionsTable, CardReviewsTable, FollowersTable, ReviewsTable, FoldersTable)
             logger.info("Tablas creadas/verificadas correctamente")
         }
     }

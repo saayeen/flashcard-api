@@ -17,6 +17,16 @@ object CardRepository {
         answer    = row[CardsTable.answer]
     )
 
+    // recalcula y actualiza card_count en el paquete (de main)
+    private fun syncCardCount(packageId: Int) {
+        val count = CardsTable.selectAll()
+            .where { CardsTable.packageId eq packageId and CardsTable.deletedAt.isNull() }
+            .count().toInt()
+        PackagesTable.update({ PackagesTable.id eq packageId }) {
+            it[PackagesTable.cardCount] = count
+        }
+    }
+
     fun findByPackageId(packageId: Int): List<Card> = transaction {
         CardsTable.selectAll()
             .where { CardsTable.packageId eq packageId and (CardsTable.deletedAt.isNull()) }
@@ -36,6 +46,7 @@ object CardRepository {
             it[CardsTable.question]  = question
             it[CardsTable.answer]    = answer
         } get CardsTable.id
+        syncCardCount(packageId)
         findById(newId)!!
     }
 
@@ -49,15 +60,16 @@ object CardRepository {
 
     // soft delete — no borra el registro, solo marca deletedAt
     fun delete(id: Int): Boolean = transaction {
+        val card = findById(id) ?: return@transaction false
         val updated = CardsTable.update({ CardsTable.id eq id }) {
             it[CardsTable.deletedAt] = LocalDateTime.now()
         }
+        if (updated > 0) syncCardCount(card.packageId)
         updated > 0
     }
 
     // ── Copy-on-write ────────────────────────────────────────────
 
-    // Devuelve las tarjetas que un paquete "ve" realmente, sea original o fork
     fun getEffectiveCards(packageId: Int): List<Card> = transaction {
         val pkg = PackagesTable.selectAll()
             .where { PackagesTable.id eq packageId }
@@ -68,7 +80,7 @@ object CardRepository {
             .toList()
 
         val forkedFromId = pkg[PackagesTable.forkedFromId]
-            ?: return@transaction ownCardsRows.map { rowToCard(it) } // paquete original: no hay nada más que resolver
+            ?: return@transaction ownCardsRows.map { rowToCard(it) }
 
         val excludedIds = CardExclusionsTable.selectAll()
             .where { CardExclusionsTable.packageId eq packageId }
@@ -90,7 +102,6 @@ object CardRepository {
         (ownCardsRows + inheritedFromOriginal).map { rowToCard(it) }
     }
 
-    // Si el fork todavía depende en vivo de esta tarjeta, la copia hacia su propio packageId.
     private fun materializeIfNeeded(forkPackageId: Int, originalCard: ResultRow) {
         val originalCardId = originalCard[CardsTable.id]
 
@@ -116,7 +127,6 @@ object CardRepository {
         }
     }
 
-    // Llamar ANTES de aplicar un update/delete sobre una tarjeta del original
     fun protectDependentForks(originalCardId: Int) = transaction {
         val originalCard = CardsTable.selectAll()
             .where { CardsTable.id eq originalCardId }
@@ -136,7 +146,6 @@ object CardRepository {
         }
     }
 
-    // Igual, pero para cuando se borra el PAQUETE completo
     fun protectDependentForksOnPackageDelete(originalPackageId: Int) = transaction {
         val activeForks = PackagesTable.selectAll()
             .where {
@@ -153,4 +162,49 @@ object CardRepository {
             originalCards.forEach { card -> materializeIfNeeded(forkId, card) }
         }
     }
+
+    fun editInheritedCard(forkPackageId: Int, originalCardId: Int, question: String?, answer: String?): Card = transaction {
+        val originalCard = CardsTable.selectAll()
+            .where { CardsTable.id eq originalCardId }
+            .single()
+
+        // ¿ya existe una copia editada de esta tarjeta en este fork?
+        val existingOverride = CardsTable.selectAll()
+            .where { CardsTable.packageId eq forkPackageId and (CardsTable.sourceCardId eq originalCardId) }
+            .singleOrNull()
+
+        val targetId = if (existingOverride != null) {
+            val id = existingOverride[CardsTable.id]
+            CardsTable.update({ CardsTable.id eq id }) {
+                if (question != null) it[CardsTable.question] = question
+                if (answer != null) it[CardsTable.answer] = answer
+            }
+            id
+        } else {
+            CardsTable.insert {
+                it[CardsTable.packageId]    = forkPackageId
+                it[CardsTable.question]     = question ?: originalCard[CardsTable.question]
+                it[CardsTable.answer]       = answer ?: originalCard[CardsTable.answer]
+                it[CardsTable.sourceCardId] = originalCardId
+            } get CardsTable.id
+        }
+
+        findById(targetId)!!
+    }
+
+    fun excludeInheritedCard(forkPackageId: Int, originalCardId: Int) = transaction {
+        val alreadyExcluded = CardExclusionsTable.selectAll()
+            .where {
+                CardExclusionsTable.packageId eq forkPackageId and
+                        (CardExclusionsTable.originalCardId eq originalCardId)
+            }.count() > 0
+
+        if (!alreadyExcluded) {
+            CardExclusionsTable.insert {
+                it[CardExclusionsTable.packageId] = forkPackageId
+                it[CardExclusionsTable.originalCardId] = originalCardId
+            }
+        }
+    }
 }
+

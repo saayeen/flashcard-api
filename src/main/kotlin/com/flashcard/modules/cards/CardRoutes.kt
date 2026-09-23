@@ -29,34 +29,36 @@ fun Route.cardRoutes() {
                 return@requireAuth
             }
             val body = call.receive<CreateCardRequest>()
-            val card = CardService.create(packageId, userId, body)   // 👈 se agrega userId
+            val card = CardService.create(packageId, userId, body)
             call.respond(HttpStatusCode.Created, card)
         }
     }
 
     // PATCH /cards/{id} — editar tarjeta
-    patch("/cards/{id}") {
+    patch("/packages/{packageId}/cards/{cardId}") {
         call.requireAuth { userId ->
-            val id = call.parameters["id"]?.toIntOrNull()
-            if (id == null) {
+            val packageId = call.parameters["packageId"]?.toIntOrNull()
+            val cardId = call.parameters["cardId"]?.toIntOrNull()
+            if (packageId == null || cardId == null) {
                 call.respond(HttpStatusCode.BadRequest, MessageResponse("id invalido"))
                 return@requireAuth
             }
             val body = call.receive<UpdateCardRequest>()
-            val updated = CardService.update(id, userId, body.question, body.answer)  // 👈 firma nueva
+            val updated = CardService.update(packageId, cardId, userId, body.question, body.answer)
             call.respond(HttpStatusCode.OK, updated)
         }
     }
 
-    // DELETE /cards/{id} — soft delete
-    delete("/cards/{id}") {
+    // DELETE /{packageId}/cards/{cardId} — soft delete
+    delete("/{packageId}/cards/{cardId}") {
         call.requireAuth { userId ->
-            val id = call.parameters["id"]?.toIntOrNull()
-            if (id == null) {
+            val packageId = call.parameters["packageId"]?.toIntOrNull()
+            val cardId = call.parameters["cardId"]?.toIntOrNull()
+            if (packageId == null || cardId == null) {
                 call.respond(HttpStatusCode.BadRequest, MessageResponse("id invalido"))
                 return@requireAuth
             }
-            val eliminado = CardService.delete(id, userId)   // 👈 se agrega userId
+            val eliminado = CardService.delete(packageId,cardId, userId)
             if (!eliminado) {
                 call.respond(HttpStatusCode.NotFound, MessageResponse("Tarjeta no encontrada"))
                 return@requireAuth
