@@ -6,10 +6,6 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 
 suspend fun ApplicationCall.getUserId(): String? {
-    // 🚧 SOLO PARA TESTING LOCAL — BORRAR ANTES DE MERGEAR 🚧
-    val debugUserId = request.queryParameters["debugUserId"]
-    if (debugUserId != null) return debugUserId
-    // 🚧 FIN DEL BYPASS 🚧
 
     val authHeader = request.header("Authorization") ?: return null
     if (!authHeader.startsWith("Bearer ")) return null
@@ -21,14 +17,6 @@ suspend fun ApplicationCall.getUserId(): String? {
 suspend fun ApplicationCall.requireAuth(
     block: suspend (userId: String) -> Unit
 ) {
-    // 🚧 SOLO PARA TESTING LOCAL — BORRAR ANTES DE MERGEAR 🚧
-    val debugUserId = request.queryParameters["debugUserId"]
-    if (debugUserId != null) {
-        block(debugUserId)
-        return
-    }
-    // 🚧 FIN DEL BYPASS 🚧
-
     val userId = getUserId()
     if (userId == null) {
         respond(HttpStatusCode.Unauthorized, mapOf("message" to "Token invalido o ausente"))

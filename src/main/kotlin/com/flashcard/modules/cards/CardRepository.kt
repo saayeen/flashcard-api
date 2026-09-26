@@ -73,7 +73,8 @@ object CardRepository {
     fun getEffectiveCards(packageId: Int): List<Card> = transaction {
         val pkg = PackagesTable.selectAll()
             .where { PackagesTable.id eq packageId }
-            .single()
+            .singleOrNull()
+            ?: throw IllegalArgumentException("Paquete no encontrado")
 
         val ownCardsRows = CardsTable.selectAll()
             .where { CardsTable.packageId eq packageId and CardsTable.deletedAt.isNull() }
@@ -130,7 +131,7 @@ object CardRepository {
     fun protectDependentForks(originalCardId: Int) = transaction {
         val originalCard = CardsTable.selectAll()
             .where { CardsTable.id eq originalCardId }
-            .single()
+            .singleOrNull() ?: throw IllegalArgumentException("Tarjeta no encontrada")
 
         val originalPackageId = originalCard[CardsTable.packageId]
 
@@ -166,7 +167,7 @@ object CardRepository {
     fun editInheritedCard(forkPackageId: Int, originalCardId: Int, question: String?, answer: String?): Card = transaction {
         val originalCard = CardsTable.selectAll()
             .where { CardsTable.id eq originalCardId }
-            .single()
+            .singleOrNull() ?: throw IllegalArgumentException("Tarjeta original no encontrada")
 
         // ¿ya existe una copia editada de esta tarjeta en este fork?
         val existingOverride = CardsTable.selectAll()

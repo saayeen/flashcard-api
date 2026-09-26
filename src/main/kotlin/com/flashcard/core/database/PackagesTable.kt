@@ -8,11 +8,13 @@ import org.jetbrains.exposed.sql.javatime.datetime
 object PackagesTable : Table("packages") {
     val id               = integer("id").autoIncrement()
     val userId           = varchar("user_id", 128)
+    val type             = varchar("type", 20).default("deck")   //  nuevo: "deck" | "folder"
     val name             = varchar("name", 255)
-    val description      = text("description")
-    val category         = varchar("category", 100)
+    val description      = text("description").nullable()         //nullable ahora, folders no siempre la usan
+    val category         = varchar("category", 100).nullable()
     val cardCount        = integer("card_count").default(0)
     val isPublic         = bool("is_public").default(true)
+    val color            = varchar("color", 20).nullable()         //  solo para folders
     val deletedAt        = datetime("deleted_at").nullable()
     val forkedFromId     = integer("forked_from_id").nullable()
     val originalAuthorId = varchar("original_author_id", 128).nullable()

@@ -2,7 +2,6 @@ package com.flashcard.plugins
 
 import com.flashcard.modules.cards.cardRoutes
 import com.flashcard.modules.collaboration.collaborationRoutes
-import com.flashcard.modules.folders.folderRoutes
 import com.flashcard.modules.packages.packageRoutes
 import com.flashcard.modules.search.searchRoutes
 import com.flashcard.modules.study.studyRoutes
@@ -16,7 +15,6 @@ fun Application.configureRouting() {
         packageRoutes()
         cardRoutes()
         studyRoutes()
-        folderRoutes()
         searchRoutes()
         collaborationRoutes()
     }
